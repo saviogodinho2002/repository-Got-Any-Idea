@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "974529157207",
+    "project_id": "got-any-idea",
+    "storage_bucket": "got-any-idea.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974529157207:android:9e9e1d99a43752d990eb12",
+        "android_client_info": {
+          "package_name": "com.savio.gotanyidea"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974529157207-p1hlk8vta1ngca6p2cgkgqktej4qh1d7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHKyOKxraR4Jf-_cC3sAo1V2bkKeMI30I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974529157207-p1hlk8vta1ngca6p2cgkgqktej4qh1d7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

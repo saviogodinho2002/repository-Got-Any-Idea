@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Got Any Idea</string>
+    <string name="email">E-mail</string>
+    <string name="senha">Senha</string>
+    <string name="login">Login</string>
+    <string name="createaccout">Não tem uma conta? Clique aqui.</string>
+    <string name="name">Nome</string>
+    <string name="newpost">Nova postagem ...</string>
+    <string name="ideiapost">Que idéia você tem hoje?</string>
+    <string name="post">POSTAR</string>
+    <string name="tagtec">TECNOLOGIA</string>
+    <string name="taggamb">GAMBIARRA</string>
+    <string name="tagarte">ARTES</string>
+    <string name="tagsexo">NFSW</string>
+    <string name="tagaliment">ALIMENTO</string>
+    <string name="nullimage">Tirar imagem</string>
+</resources>

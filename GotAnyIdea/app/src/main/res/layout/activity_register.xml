@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".RegisterActivity">
+
+
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_button_rounded"
+        android:text="@string/login"
+        app:layout_constraintEnd_toEndOf="@+id/cx_confirm_password"
+        app:layout_constraintStart_toStartOf="@+id/cx_confirm_password"
+        app:layout_constraintTop_toBottomOf="@+id/cx_confirm_password" />
+
+    <EditText
+        android:id="@+id/cx_confirm_password"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:ems="10"
+        android:hint="@string/senha"
+        android:inputType="textPassword"
+        android:paddingLeft="10dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        app:layout_constraintEnd_toEndOf="@+id/cx_register_password"
+        app:layout_constraintStart_toStartOf="@+id/cx_register_password"
+        app:layout_constraintTop_toBottomOf="@+id/cx_register_password" />
+
+    <EditText
+        android:id="@+id/cx_register_password"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:ems="10"
+        android:hint="@string/senha"
+        android:inputType="textPassword"
+        android:paddingLeft="10dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        app:layout_constraintEnd_toEndOf="@+id/cx_register_email"
+        app:layout_constraintStart_toStartOf="@+id/cx_register_email"
+        app:layout_constraintTop_toBottomOf="@+id/cx_register_email" />
+
+    <EditText
+        android:id="@+id/cx_register_email"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:ems="10"
+        android:hint="@string/email"
+        android:inputType="textEmailAddress"
+        android:paddingLeft="10dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.508"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cx_register_name" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/img_photo_select"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:civ_border_width="2dp"
+        app:civ_border_color="@color/teal_700"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/pf_default"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/pf_default" />
+
+    <EditText
+        android:id="@+id/cx_register_name"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:ems="10"
+        android:hint="@string/name"
+        android:inputType="textPersonName"
+        android:paddingLeft="10dp"
+        android:textColorHint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img_photo_select" />
+</androidx.constraintlayout.widget.ConstraintLayout>
