@@ -43,25 +43,25 @@ public class CreatePostActivity extends AppCompatActivity {
     private EditText cxTextoPost;
     private Button btnPost;
     private TextView txtUserName;
-    private CheckBox chkAlimentos, chkTecnologia,chkArte,chkGambiarra;
+    private CheckBox chkCulinaria, chkTecnologia,chkArte,chkGambiarra;
     private List<CheckBox> checkBoxesList;
-    private String tag;
+    private List<String> tags;
     User me;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
-
+        tags = new ArrayList<>();
         checkBoxesList =  new ArrayList<>();
         selectedPhotoDirectory = null;
 
-        chkAlimentos = findViewById(R.id.check_tag_alimento);
+        chkCulinaria = findViewById(R.id.check_tag_culinaria);
         chkTecnologia = findViewById(R.id.check_tag_tecnologia);
         chkArte =  findViewById(R.id.check_tag_arte);
         chkGambiarra =  findViewById(R.id.check_tag_gambiarra);
 
         checkBoxesList.add(chkArte);
-        checkBoxesList.add(chkAlimentos);
+        checkBoxesList.add(chkCulinaria);
         checkBoxesList.add(chkTecnologia);
         checkBoxesList.add(chkGambiarra);
 
@@ -86,37 +86,38 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    unMarkCheckBox(chkTecnologia);
-                tag = chkTecnologia.getText().toString();
-                }
+                   tags.add(chkTecnologia.getText().toString());
+              //  tag = chkTecnologia.getText().toString();
+                }else  tags.remove(chkTecnologia.getText().toString());
             }
         });
         chkGambiarra.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    unMarkCheckBox(chkGambiarra);
-                    tag = chkGambiarra.getText().toString();
-
-                }
+                   // unMarkCheckBox(chkGambiarra);
+                    //tag = chkGambiarra.getText().toString();
+                    tags.add(chkGambiarra.getText().toString());
+                }else  tags.remove(chkGambiarra.getText().toString());
             }
         });
         chkArte.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    unMarkCheckBox(chkArte);
-                    tag = chkArte.getText().toString();
-                }
+                    //unMarkCheckBox(chkArte);
+                    //tag = chkArte.getText().toString();
+                    tags.add(chkArte.getText().toString());
+                }else tags.remove(chkArte.getText().toString());
             }
         });
-        chkAlimentos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        chkCulinaria.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    unMarkCheckBox(chkAlimentos);
-                    tag = chkAlimentos.getText().toString();
-                }
+                    //unMarkCheckBox(chkCulinaria);
+                    tags.add(chkCulinaria.getText().toString());
+                }else tags.remove(chkCulinaria.getText().toString());
             }
         });
         btnPost.setOnClickListener(new View.OnClickListener() {
@@ -127,21 +128,9 @@ public class CreatePostActivity extends AppCompatActivity {
         });
 
     }
-    private void unMarkCheckBox(CheckBox checkBox){
-        for (CheckBox check:
-             checkBoxesList) {
-            if(check!=checkBox) check.setChecked(false);
-        }
-
-    }
 
     private void createPost(){
-        String tag = null;
-        for (CheckBox check:
-             checkBoxesList) {
-            if(check.isChecked()) tag = check.getText().toString();
-        }
-        if(tag == null) {
+        if(tags.isEmpty() ) {
             Toast.makeText(CreatePostActivity.this, "Marque uma Tag", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -153,15 +142,13 @@ public class CreatePostActivity extends AppCompatActivity {
         String filename = UUID.randomUUID().toString();
         final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
 
-        String finalTag = tag;
-        //String urlPhotoPost = uri.toString();
         String meUserName = me.getName();
         String meId = me.getUserID();
         String urlPhotoUser = me.getUrlProfilePhoto();
         long timestamp = System.currentTimeMillis();
         Posts post = new Posts();
-        //post.setUrlPhotoPost(urlPhotoPost);
-        post.setTag(finalTag);
+
+         post.setTag(tags);
         post.setFromName(meUserName);
         post.setTimestamp(timestamp);
         post.setFromID(meId);
@@ -169,11 +156,18 @@ public class CreatePostActivity extends AppCompatActivity {
         post.setUrlPhotoUser(urlPhotoUser);
         Intent intent = new Intent(CreatePostActivity.this, FeedActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        FirebaseFirestore.getInstance().collection("/"+finalTag)
+
+        Log.e("teste","chegou ate aqui?");
+        FirebaseFirestore.getInstance().collection("/posts")
                 .add(post)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+                        Log.e("teste","UPOU O POST");
+                        FirebaseFirestore.getInstance().collection("/posts")
+                                .document(documentReference.getId())
+                                .update("postID",documentReference.getId());
+
                         if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
                             Log.e("teste","UPANDO IMG");
                             ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -184,7 +178,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                         @Override
                                         public void onSuccess(Uri uri) {
                                             Log.e("teste","baixou");
-                                            FirebaseFirestore.getInstance().collection("/"+finalTag)
+                                            FirebaseFirestore.getInstance().collection("/posts")
                                                     .document(documentReference.getId())
                                                     .update("urlPhotoPost", uri.toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
@@ -212,7 +206,12 @@ public class CreatePostActivity extends AppCompatActivity {
                         startActivity(intent);
                         }
                     }
-                });
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull  Exception e) {
+                Log.e("teste",e.getMessage());
+            }
+        });
 
         }
 

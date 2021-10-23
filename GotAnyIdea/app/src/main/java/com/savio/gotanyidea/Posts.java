@@ -3,8 +3,35 @@ package com.savio.gotanyidea;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Posts implements Parcelable {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Posts  {
     private String fromID;
+
+    private String fromName;
+
+    private String postID;
+
+    private List<String> tag;
+    private long timestamp;
+    private String urlPhotoPost;
+
+    private String urlPhotoUser;
+    private String postText;
+
+    public Posts() {
+        tag = new ArrayList<>();
+    }
+    public List<String> getTag() {
+        return tag;
+    }
+
+    public void setTag(List<String> tag) {
+
+        this.tag = tag;
+    }
+
 
     public String getFromName() {
         return fromName;
@@ -14,10 +41,6 @@ public class Posts implements Parcelable {
         this.fromName = fromName;
     }
 
-    private String fromName;
-    private String Tag;
-    private long timestamp;
-    private String urlPhotoPost;
 
     public String getUrlPhotoUser() {
         return urlPhotoUser;
@@ -27,34 +50,6 @@ public class Posts implements Parcelable {
         this.urlPhotoUser = urlPhotoUser;
     }
 
-    private String urlPhotoUser;
-    private String postText;
-
-    public Posts() {
-
-    }
-
-    protected Posts(Parcel in) {
-        fromID = in.readString();
-        Tag = in.readString();
-        timestamp = in.readLong();
-        urlPhotoPost = in.readString();
-        postText = in.readString();
-        urlPhotoUser = in.readString();
-        fromID = in.readString();
-    }
-
-    public static final Creator<Posts> CREATOR = new Creator<Posts>() {
-        @Override
-        public Posts createFromParcel(Parcel in) {
-            return new Posts(in);
-        }
-
-        @Override
-        public Posts[] newArray(int size) {
-            return new Posts[size];
-        }
-    };
 
     public String getFromID() {
         return fromID;
@@ -64,13 +59,6 @@ public class Posts implements Parcelable {
         this.fromID = fromID;
     }
 
-    public String getTag() {
-        return Tag;
-    }
-
-    public void setTag(String tag) {
-        Tag = tag;
-    }
 
     public long getTimestamp() {
         return timestamp;
@@ -96,19 +84,11 @@ public class Posts implements Parcelable {
         this.postText = postText;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getPostID() {
+        return postID;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(fromID);
-        dest.writeString(Tag);
-        dest.writeLong(timestamp);
-        dest.writeString(urlPhotoPost);
-        dest.writeString(postText);
-        dest.writeString(urlPhotoUser);
-        dest.writeString(fromName);
+    public void setPostID(String postID) {
+        this.postID = postID;
     }
 }

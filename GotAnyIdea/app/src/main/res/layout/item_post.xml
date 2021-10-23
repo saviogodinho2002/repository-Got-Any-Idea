@@ -3,20 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@drawable/bg_layout_border"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_layout_border">
+
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/photo_user_post"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="8dp"
+        app:civ_border_color="@color/teal_700"
+        app:civ_border_width="2dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.013"
+        app:layout_constraintHorizontal_bias="0.042"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:civ_border_width="2dp"
-        app:civ_border_color="@color/teal_700"
         app:srcCompat="@drawable/pf_default"
         tools:srcCompat="@drawable/pf_default" />
 
@@ -24,27 +25,28 @@
         android:id="@+id/txt_post"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
         android:layout_marginRight="15dp"
         android:maxHeight="300dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/photo_user_post"
         app:layout_constraintTop_toBottomOf="@+id/txt_fromname_post" />
+
 
     <ImageView
         android:id="@+id/photo_post"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:maxWidth="340dp"
+        android:layout_height="250dp"
+        android:layout_marginBottom="10dp"
+        android:maxWidth="350dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/txt_post"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/photo_user_post"
+        app:layout_constraintStart_toStartOf="@+id/photo_user_post"
         app:layout_constraintTop_toBottomOf="@+id/txt_tag_post"
+        app:layout_constraintVertical_bias="0.0"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
@@ -53,12 +55,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
         android:text="TextView"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/photo_user_post"
-        app:layout_constraintEnd_toEndOf="@+id/txt_post"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintEnd_toStartOf="@+id/spin_post_options"
         app:layout_constraintStart_toEndOf="@+id/photo_user_post"
         app:layout_constraintTop_toTopOf="@+id/photo_user_post" />
 
@@ -66,10 +69,26 @@
         android:id="@+id/txt_tag_post"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
         android:text="TextView"
         android:textSize="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/txt_post"
-        app:layout_constraintHorizontal_bias="0.962"
+        app:layout_constraintHorizontal_bias="0.92"
         app:layout_constraintStart_toStartOf="@+id/txt_post"
-        app:layout_constraintTop_toBottomOf="@+id/txt_post" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_post"
+        app:layout_constraintVertical_bias="0.003" />
+
+    <Spinner
+        android:id="@+id/spin_post_options"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/moreoptions"
+        android:spinnerMode="dropdown"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

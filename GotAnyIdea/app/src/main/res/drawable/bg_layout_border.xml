@@ -3,7 +3,14 @@
     <solid
         android:color="@color/black"
         />
+    <gradient
+        android:startColor="@color/purple_700"
+        />
+    <stroke
+        android:width="2.5dp"
+        android:color="@color/teal_700"
+        />
     <corners android:radius="25dp"/>
-    <stroke android:color="@color/purple_700"/>
+
 
 </shape>

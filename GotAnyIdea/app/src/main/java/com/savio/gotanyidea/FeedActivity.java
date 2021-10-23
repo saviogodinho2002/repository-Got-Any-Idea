@@ -3,21 +3,32 @@ package com.savio.gotanyidea;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Space;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.SuccessContinuation;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
@@ -30,26 +41,80 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
 import com.xwray.groupie.GroupAdapter;
 import com.xwray.groupie.Item;
+import com.xwray.groupie.OnItemClickListener;
+import com.xwray.groupie.OnItemLongClickListener;
 import com.xwray.groupie.ViewHolder;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class FeedActivity extends AppCompatActivity {
-    Button btnNewPost;
-    ImageView photoUser;
-    GroupAdapter adapter;
-    User me;
-    String tag;
-    RecyclerView rv;
+    private Button btnNewPost;
+    private ImageView photoUser;
+    private GroupAdapter adapter;
+    private User me;
+    private List<Posts> postContainTag;
+    private List<String> tags;
+    private RecyclerView rv;
+    private Spinner dropList;
+    private String[] itemsDropList;
+    private String[] itensDropOptions;
+    ArrayAdapter<String> adapterSpinPost;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+
+        dropList = findViewById(R.id.spin_tags);
+
+        itemsDropList = new String[]{"      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
+         itensDropOptions =  new String[]{"      EXCLUIR","      EDITAR"};
+          adapterSpinPost = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensDropOptions);
+        ArrayAdapter<String> adapterDropList = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itemsDropList);
+        dropList.setAdapter(adapterDropList);
+
+        dropList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position){
+                    case 0:
+                        tags.clear();
+                        tags.add("TECNOLOGIA");
+                        break;
+                    case 1:
+                        tags.clear();
+                        tags.add("CULINARIA");
+                        break;
+                    case 2:
+                        tags.clear();
+                        tags.add("GAMBIARRA");
+                        break;
+                    case 3:
+                        tags.clear();
+                        tags.add("ARTES");
+                        break;
+                }
+                fethPosts();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         verifyAutentication();
         adapter = new GroupAdapter();
 
+        tags = new ArrayList<>();
+        postContainTag = new ArrayList<>();
+
         rv = findViewById(R.id.recycler_posts);
         rv.setLayoutManager(new LinearLayoutManager(FeedActivity.this));
+        rv.addItemDecoration(new DividerItemDecoration(FeedActivity.this,LinearLayoutManager.VERTICAL));
         rv.setAdapter(adapter);
 
         btnNewPost = findViewById(R.id.btn_newpost);
@@ -61,17 +126,31 @@ public class FeedActivity extends AppCompatActivity {
                 toCreatePostActivity();
             }
         });
+    adapter.setOnItemLongClickListener(new OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(@NonNull Item item, @NonNull  View view) {
+            ItemPost itemPost = (ItemPost) item;
+
+                
+
+            Log.e("teste","segurando......");
+            return true;
+        }
+    });
 
     }
     private void toCreatePostActivity(){
         Intent intent =  new Intent(FeedActivity.this,CreatePostActivity.class);
         startActivity(intent);
     }
-    private void fethPosts(){
-        tag = "ALIMENTO";
-        if(me != null){
+    private void deletePost(){
 
-            FirebaseFirestore.getInstance().collection("/"+tag)
+    }
+    private void fethPosts(){
+
+        if(me != null){
+            adapter.clear();
+            FirebaseFirestore.getInstance().collection("/posts")
                     .orderBy("timestamp", Query.Direction.DESCENDING)
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
@@ -80,7 +159,13 @@ public class FeedActivity extends AppCompatActivity {
                             for (DocumentChange doc: documentChanges){
                                 if(doc.getType() == DocumentChange.Type.ADDED){
                                     Posts post = doc.getDocument().toObject(Posts.class);
-                                    adapter.add(new ItemPost(post));
+                                    Log.i("teste","chegou nos docs");
+                                    if( !Collections.disjoint(tags,post.getTag()) ) {
+                                        Log.i("teste", "DEU CERTO AMEM?");
+                                        adapter.add(new ItemPost(post));
+
+                                    }
+
                                 }
                             }
                         }
@@ -131,12 +216,14 @@ public class FeedActivity extends AppCompatActivity {
         }
         return true;
     }
+
 private class ItemPost extends Item<ViewHolder> {
         Posts post;
 
     public ItemPost(Posts post) {
         this.post = post;
     }
+    private Spinner spinner;
 
     @Override
     public void bind(@NonNull  ViewHolder viewHolder, int position) {
@@ -146,11 +233,21 @@ private class ItemPost extends Item<ViewHolder> {
         TextView txtTagPost = viewHolder.getRoot().findViewById(R.id.txt_tag_post);
         ImageView photoPost = viewHolder.getRoot().findViewById(R.id.photo_post);
 
+         spinner =  viewHolder.getRoot().findViewById(R.id.spin_post_options);
+         spinner.setSelected(false);
+         spinner.setAdapter(adapterSpinPost);
+
+
+
+        if( !post.getFromID().equals(me.getUserID()) )  spinner.setVisibility(View.GONE);
         Picasso.get()
                 .load(post.getUrlPhotoUser())
                 .into(photoUserPost);
 
-        txtTagPost.setText("#"+post.getTag());
+        txtTagPost.setText("");
+        for(String tag :post.getTag()){
+            txtTagPost.setText( txtTagPost.getText()+" " + "#"+tag);
+        }
 
         txtPost.setText(post.getPostText());
 
@@ -160,6 +257,9 @@ private class ItemPost extends Item<ViewHolder> {
             Picasso.get()
                     .load(post.getUrlPhotoPost())
                     .into(photoPost);
+
+        }else {
+           photoPost.setVisibility(View.GONE);
         }
     }
 

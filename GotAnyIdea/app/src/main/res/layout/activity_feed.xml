@@ -23,17 +23,26 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp" >
+                android:layout_height="52dp">
+
+                <Spinner
+                    android:id="@+id/spin_tags"
+                    android:layout_width="57dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/iconlistasuspensa"
+                    android:spinnerMode="dropdown"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/img_profilephoto"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:src="@drawable/pf_default"
+                    app:civ_border_color="@color/purple_700"
+                    app:civ_border_width="2dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:civ_border_width="2dp"
-                    app:civ_border_color="@color/purple_700"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:srcCompat="@drawable/pf_default" />
 
@@ -47,9 +56,11 @@
                     android:gravity="center|left"
                     android:text="@string/newpost"
                     app:layout_constraintBottom_toBottomOf="@+id/img_profilephoto"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/spin_tags"
                     app:layout_constraintStart_toEndOf="@+id/img_profilephoto"
                     app:layout_constraintTop_toTopOf="@+id/img_profilephoto" />
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>

@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,6 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btnRegister;
     private Uri photoSelectedDiretory;
     private String meUserID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
         cxConfirmPassword = findViewById(R.id.cx_confirm_password);
         btnRegister = findViewById(R.id.btn_register);
         photoSelect = findViewById(R.id.img_photo_select);
+
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
