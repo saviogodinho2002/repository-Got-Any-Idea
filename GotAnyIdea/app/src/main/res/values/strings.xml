@@ -15,4 +15,6 @@
     <string name="tagaliment">ALIMENTO</string>
     <string name="nullimage">Tirar imagem</string>
     <string name="tagculinaria">CULINARIA</string>
+    <string name="numlikes">0</string>
+    <string name="comentario">Comentar ...</string>
 </resources>

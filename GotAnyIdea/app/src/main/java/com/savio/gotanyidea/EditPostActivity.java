@@ -1,9 +1,5 @@
 package com.savio.gotanyidea;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -20,9 +16,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.SuccessContinuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,10 +37,11 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class CreatePostActivity extends AppCompatActivity {
+public class EditPostActivity extends AppCompatActivity {
     private ImageView photoSelect,photoUser,photoPost;
     private Uri selectedPhotoDirectory;
     private EditText cxTextoPost;
@@ -48,13 +50,17 @@ public class CreatePostActivity extends AppCompatActivity {
     private CheckBox chkCulinaria, chkTecnologia,chkArte,chkGambiarra;
     private List<CheckBox> checkBoxesList;
     private List<String> tags;
-    User me;
+    private String postID;
+    private  Posts postFromIntent;
+    private User me;
+    private List<String> userLikeID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
         tags = new ArrayList<>();
         checkBoxesList =  new ArrayList<>();
+        userLikeID = new ArrayList<>();
         selectedPhotoDirectory = null;
 
         chkCulinaria = findViewById(R.id.check_tag_culinaria);
@@ -97,8 +103,7 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                   // unMarkCheckBox(chkGambiarra);
-                    //tag = chkGambiarra.getText().toString();
+
                     tags.add(chkGambiarra.getText().toString());
                 }else  tags.remove(chkGambiarra.getText().toString());
             }
@@ -107,8 +112,7 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    //unMarkCheckBox(chkArte);
-                    //tag = chkArte.getText().toString();
+
                     tags.add(chkArte.getText().toString());
                 }else tags.remove(chkArte.getText().toString());
             }
@@ -117,7 +121,7 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    //unMarkCheckBox(chkCulinaria);
+
                     tags.add(chkCulinaria.getText().toString());
                 }else tags.remove(chkCulinaria.getText().toString());
             }
@@ -129,16 +133,61 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         });
 
+
+        Log.e("teste","ENTROU EM EDIT");
+       postID = getIntent().getExtras().getString("postID") ;
+        fetchPostData();
+    }
+    private void fetchPostData(){
+        Log.e("teste","FETCHIN POSTS");
+        FirebaseFirestore.getInstance().collection("/posts")
+                .document(postID)
+                .get().onSuccessTask(new SuccessContinuation<DocumentSnapshot, Object>() {
+            @NonNull
+            @Override
+            public Task<Object> then(@Nullable  DocumentSnapshot documentSnapshot) throws Exception {
+                Log.e("teste","conseguiu chegar no post");
+                if(documentSnapshot != null){
+                    Log.e("teste","nao nulo");
+                postFromIntent = documentSnapshot.toObject(Posts.class);
+                    Log.e("teste","PASSOU PRO POSTFORM");
+                if ((postFromIntent.getUrlPhotoPost() != null) && (!postFromIntent.getUrlPhotoPost().isEmpty())) {
+                    Log.e("teste","nao nulo e nem vazio foto");
+                    Picasso.get()
+                            .load(postFromIntent.getUrlPhotoPost())
+                            .into(photoPost);
+                }
+                cxTextoPost.setText(postFromIntent.getPostText());
+                List<String> tagsList = postFromIntent.getTag();
+                userLikeID = postFromIntent.getUserLikedId();
+                tags.clear();
+                for (String tag : tagsList) {
+                    for (CheckBox check : checkBoxesList) {
+                        if (check.getText().equals(tag)) {
+                            check.setChecked(true);
+                            if(!tags.contains(tag))
+                            tags.add(tag);
+                        }
+
+                    }
+
+                }
+            }
+                return null;
+            }
+
+        });
+
     }
 
     private void createPost(){
         if(tags.isEmpty() ) {
-            Toast.makeText(CreatePostActivity.this, "Marque uma Tag", Toast.LENGTH_SHORT).show();
+            Toast.makeText(EditPostActivity.this, "Marque uma Tag", Toast.LENGTH_SHORT).show();
             return;
         }
         String textoPost = cxTextoPost.getText().toString();
         if(textoPost == null || textoPost.isEmpty()){
-            Toast.makeText(CreatePostActivity.this, "Insira um texto", Toast.LENGTH_SHORT).show();
+            Toast.makeText(EditPostActivity.this, "Insira um texto", Toast.LENGTH_SHORT).show();
             return;
         }
         String filename = UUID.randomUUID().toString();
@@ -149,31 +198,30 @@ public class CreatePostActivity extends AppCompatActivity {
         String urlPhotoUser = me.getUrlProfilePhoto();
         long timestamp = System.currentTimeMillis();
         Posts post = new Posts();
-
+        if((userLikeID != null) && (!userLikeID.isEmpty()) )   post.setUserLikedId(userLikeID);
+        post.setNumLikes(postFromIntent.getNumLikes());
         post.setTag(tags);
         post.setFromName(meUserName);
         post.setTimestamp(timestamp);
         post.setFromID(meId);
+        post.setPostID(postID);
         post.setPostText(textoPost);
         post.setUrlPhotoUser(urlPhotoUser);
-        post.setNumLikes(0);
-
-        Intent intent = new Intent(CreatePostActivity.this, FeedActivity.class);
+        Intent intent = new Intent(EditPostActivity.this, FeedActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
         Log.e("teste","chegou ate aqui?");
         FirebaseFirestore.getInstance().collection("/posts")
-                .add(post)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                .document(postID)
+                .set(post)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.e("teste","UPOU O POST");
-                        FirebaseFirestore.getInstance().collection("/posts")
-                                .document(documentReference.getId())
-                                .update("postID",documentReference.getId());
+                    public void onComplete(@NonNull Task<Void> task) {
+                       FirebaseStorage.getInstance().getReference("/images-posts/"+post.getPhotoPostFileName()).delete();
+                        Log.e("teste","DELETOU IMG ANTEIROR");
 
                         if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
-                            Log.e("teste","UPANDO IMG");
+                            Log.e("teste","UPANDO  NOVA IMG");
                             ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -183,18 +231,19 @@ public class CreatePostActivity extends AppCompatActivity {
                                         public void onSuccess(Uri uri) {
                                             Log.e("teste","baixou");
                                             FirebaseFirestore.getInstance().collection("/posts")
-                                                    .document(documentReference.getId())
+                                                    .document(post.getPostID())
                                                     .update("urlPhotoPost", uri.toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void unused) {
-                                                   FirebaseFirestore.getInstance().collection("/posts")
-                                                           .document(documentReference.getId())
-                                                           .update("photoPostFileName",filename).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                       @Override
-                                                       public void onComplete(@NonNull Task<Void> task) {
+                                                    FirebaseFirestore.getInstance().collection("/posts")
+                                                            .document(post.getPostID())
+                                                            .update("photoPostFileName",filename)
+                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void unused) {
                                                                     startActivity(intent);
-                                                       }
-                                                   });
+                                                                }
+                                                            });
                                                 }
                                             });
                                         }
@@ -215,13 +264,10 @@ public class CreatePostActivity extends AppCompatActivity {
 
                         startActivity(intent);
                         }
+
+
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull  Exception e) {
-                Log.e("teste",e.getMessage());
-            }
-        });
+                });
 
         }
 
@@ -250,7 +296,7 @@ public class CreatePostActivity extends AppCompatActivity {
     }
     private void verifyAutentication(){
         if(FirebaseAuth.getInstance().getUid() == null){
-            Intent intent =  new Intent(CreatePostActivity.this,LoginActivity.class);
+            Intent intent =  new Intent(EditPostActivity.this,LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             Log.e("teste","wtf pq");
             startActivity(intent);

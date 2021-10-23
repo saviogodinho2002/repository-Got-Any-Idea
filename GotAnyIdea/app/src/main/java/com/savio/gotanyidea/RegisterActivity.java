@@ -101,6 +101,10 @@ public class RegisterActivity extends AppCompatActivity {
             Toast.makeText(RegisterActivity.this,"Senhas não correspondem",Toast.LENGTH_SHORT).show();
             return;
         }
+        if((photoSelectedDiretory == null) || (photoSelectedDiretory.toString().isEmpty()) ) {
+            Toast.makeText(RegisterActivity.this,"Insira uma foto",Toast.LENGTH_SHORT).show();
+            return;
+        }
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override

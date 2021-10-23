@@ -70,7 +70,7 @@
             android:ems="10"
             android:gravity="top"
             android:hint="@string/ideiapost"
-            android:inputType="textPersonName" />
+            android:inputType="textMultiLine|textPersonName" />
 
         <ImageView
             android:id="@+id/photo_createpost"

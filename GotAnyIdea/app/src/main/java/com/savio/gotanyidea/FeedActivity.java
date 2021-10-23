@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,6 +40,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.xwray.groupie.GroupAdapter;
 import com.xwray.groupie.Item;
@@ -70,7 +74,7 @@ public class FeedActivity extends AppCompatActivity {
         dropList = findViewById(R.id.spin_tags);
 
         itemsDropList = new String[]{"      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
-         itensDropOptions =  new String[]{"      EXCLUIR","      EDITAR"};
+         itensDropOptions =  new String[]{"    [OPÇÕES]","      EXCLUIR","      EDITAR"};
           adapterSpinPost = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensDropOptions);
         ArrayAdapter<String> adapterDropList = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itemsDropList);
         dropList.setAdapter(adapterDropList);
@@ -126,17 +130,7 @@ public class FeedActivity extends AppCompatActivity {
                 toCreatePostActivity();
             }
         });
-    adapter.setOnItemLongClickListener(new OnItemLongClickListener() {
-        @Override
-        public boolean onItemLongClick(@NonNull Item item, @NonNull  View view) {
-            ItemPost itemPost = (ItemPost) item;
 
-                
-
-            Log.e("teste","segurando......");
-            return true;
-        }
-    });
 
     }
     private void toCreatePostActivity(){
@@ -156,6 +150,7 @@ public class FeedActivity extends AppCompatActivity {
                         @Override
                         public void onEvent(@Nullable  QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
+
                             for (DocumentChange doc: documentChanges){
                                 if(doc.getType() == DocumentChange.Type.ADDED){
                                     Posts post = doc.getDocument().toObject(Posts.class);
@@ -224,20 +219,127 @@ private class ItemPost extends Item<ViewHolder> {
         this.post = post;
     }
     private Spinner spinner;
-
+    private int numLikes;
+    private List<String> userLikedId;
     @Override
     public void bind(@NonNull  ViewHolder viewHolder, int position) {
+        ImageView likeStar = viewHolder.getRoot().findViewById(R.id.photo_like_star);
         ImageView photoUserPost = viewHolder.getRoot().findViewById(R.id.photo_user_post);
         TextView txtPost = viewHolder.getRoot().findViewById(R.id.txt_post);
         TextView txtNamePost = viewHolder.getRoot().findViewById(R.id.txt_fromname_post);
         TextView txtTagPost = viewHolder.getRoot().findViewById(R.id.txt_tag_post);
         ImageView photoPost = viewHolder.getRoot().findViewById(R.id.photo_post);
-
+        TextView txtNumLikes = viewHolder.getRoot().findViewById(R.id.txt_numlikes_post);
          spinner =  viewHolder.getRoot().findViewById(R.id.spin_post_options);
          spinner.setSelected(false);
          spinner.setAdapter(adapterSpinPost);
 
+         txtNumLikes.setText(String.valueOf(post.getNumLikes()));
+        if(!post.getUserLikedId().contains(me.getUserID()))
+         likeStar.setBackgroundResource(R.drawable.like_icon);
+        else
+            likeStar.setBackgroundResource(R.drawable.liked_icon);
 
+        likeStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(!post.getUserLikedId().contains(me.getUserID())){
+                    post.getUserLikedId().add(me.getUserID());
+                    post.setNumLikes(post.getNumLikes()+1);
+                    FirebaseFirestore.getInstance().collection("/posts")
+                            .document(post.getPostID())
+                            .update("userLikedId",post.getUserLikedId())
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                 Log.e("teste","LIKE SETADO");
+                                 FirebaseFirestore.getInstance().collection("/posts")
+                                         .document(post.getPostID())
+                                            .update("numLikes",post.getNumLikes())
+                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                     @Override
+                                     public void onSuccess(Void unused) {
+                                         Log.e("teste","LIKE incrementado");
+                                         likeStar.setBackgroundResource(R.drawable.liked_icon);
+                                         txtNumLikes.setText( String.valueOf( post.getNumLikes()) );
+                                     }
+                                 });
+
+                                }
+                            });
+
+                }else {
+                    post.getUserLikedId().remove(me.getUserID());
+                    post.setNumLikes(post.getNumLikes()-1);
+                    FirebaseFirestore.getInstance().collection("/posts")
+                            .document(post.getPostID())
+                            .update("userLikedId",post.getUserLikedId())
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Log.e("teste","LIKE SETADO");
+                                    FirebaseFirestore.getInstance().collection("/posts")
+                                            .document(post.getPostID())
+                                            .update("numLikes",post.getNumLikes())
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void unused) {
+                                                    Log.e("teste","LIKE incrementado");
+                                                    likeStar.setBackgroundResource(R.drawable.like_icon);
+                                                    txtNumLikes.setText( String.valueOf( post.getNumLikes()) );
+                                                }
+                                            });
+
+                                }
+                            });
+
+                }
+
+
+
+            }
+        });
+
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position){
+                    case 1:
+                        FirebaseFirestore.getInstance().collection("/posts")
+                                .document(post.getPostID())
+                                .delete()
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        fethPosts();
+                                        Log.e("teste","excluiu porra");
+                                        final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+post.getPhotoPostFileName());
+                                        ref.delete();
+
+                                    }
+                                });
+                        spinner.setSelection(0);
+                        break;
+                    case 2:
+
+                        Intent intent = new Intent(FeedActivity.this,EditPostActivity.class);
+                        Log.e("teste","PASSAR PARA O INTENT");
+                        intent.putExtra("postID",post.getPostID());
+                        Log.e("teste","PASSOU PARA O INTENT");
+                        spinner.setSelection(0);
+                        startActivity(intent);
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         if( !post.getFromID().equals(me.getUserID()) )  spinner.setVisibility(View.GONE);
         Picasso.get()

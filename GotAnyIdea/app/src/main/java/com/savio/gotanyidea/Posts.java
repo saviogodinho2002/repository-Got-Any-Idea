@@ -12,7 +12,7 @@ public class Posts  {
     private String fromName;
 
     private String postID;
-
+    private String photoPostFileName;
     private List<String> tag;
     private long timestamp;
     private String urlPhotoPost;
@@ -20,9 +20,30 @@ public class Posts  {
     private String urlPhotoUser;
     private String postText;
 
+    private int numLikes;
+    private List<String> userLikedId;
+
     public Posts() {
         tag = new ArrayList<>();
+        userLikedId = new ArrayList<>();
     }
+
+    public int getNumLikes() {
+        return numLikes;
+    }
+
+    public void setNumLikes(int numLikes) {
+        this.numLikes = numLikes;
+    }
+
+    public List<String> getUserLikedId() {
+        return userLikedId;
+    }
+
+    public void setUserLikedId(List<String> userLikedId) {
+        this.userLikedId = userLikedId;
+    }
+
     public List<String> getTag() {
         return tag;
     }
@@ -50,6 +71,13 @@ public class Posts  {
         this.urlPhotoUser = urlPhotoUser;
     }
 
+    public String getPhotoPostFileName() {
+        return photoPostFileName;
+    }
+
+    public void setPhotoPostFileName(String photoPostFileName) {
+        this.photoPostFileName = photoPostFileName;
+    }
 
     public String getFromID() {
         return fromID;

@@ -11,7 +11,7 @@
         android:id="@+id/cx_email"
         android:layout_width="350dp"
         android:layout_height="50dp"
-        android:layout_marginTop="184dp"
+        android:layout_marginTop="300dp"
         android:background="@drawable/bg_edittext_rounded"
         android:ems="10"
         android:hint="@string/email"
@@ -20,7 +20,6 @@
         android:textColor="@color/white"
         android:textColorHint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.262"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
