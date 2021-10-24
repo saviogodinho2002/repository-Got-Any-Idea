@@ -24,6 +24,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -48,7 +49,8 @@ public class CreatePostActivity extends AppCompatActivity {
     private CheckBox chkCulinaria, chkTecnologia,chkArte,chkGambiarra;
     private List<CheckBox> checkBoxesList;
     private List<String> tags;
-    User me;
+    private FloatingActionButton floatBtnNullImage;
+    private User me;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,11 +63,13 @@ public class CreatePostActivity extends AppCompatActivity {
         chkTecnologia = findViewById(R.id.check_tag_tecnologia);
         chkArte =  findViewById(R.id.check_tag_arte);
         chkGambiarra =  findViewById(R.id.check_tag_gambiarra);
+        floatBtnNullImage = findViewById(R.id.floatbtn_null_image);
 
         checkBoxesList.add(chkArte);
         checkBoxesList.add(chkCulinaria);
         checkBoxesList.add(chkTecnologia);
         checkBoxesList.add(chkGambiarra);
+
 
         photoSelect = findViewById(R.id.select_photo_post);
         photoUser = findViewById(R.id.photo_createpost_user);
@@ -76,6 +80,8 @@ public class CreatePostActivity extends AppCompatActivity {
         txtUserName = findViewById(R.id.txt_createpost_name);
 
         btnPost = findViewById(R.id.btnPost);
+
+        floatBtnNullImage.setVisibility(View.INVISIBLE);
         verifyAutentication();
 
         photoSelect.setOnClickListener(new View.OnClickListener() {
@@ -89,7 +95,7 @@ public class CreatePostActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
                    tags.add(chkTecnologia.getText().toString());
-              //  tag = chkTecnologia.getText().toString();
+
                 }else  tags.remove(chkTecnologia.getText().toString());
             }
         });
@@ -97,8 +103,7 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                   // unMarkCheckBox(chkGambiarra);
-                    //tag = chkGambiarra.getText().toString();
+
                     tags.add(chkGambiarra.getText().toString());
                 }else  tags.remove(chkGambiarra.getText().toString());
             }
@@ -107,8 +112,6 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    //unMarkCheckBox(chkArte);
-                    //tag = chkArte.getText().toString();
                     tags.add(chkArte.getText().toString());
                 }else tags.remove(chkArte.getText().toString());
             }
@@ -117,7 +120,7 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    //unMarkCheckBox(chkCulinaria);
+
                     tags.add(chkCulinaria.getText().toString());
                 }else tags.remove(chkCulinaria.getText().toString());
             }
@@ -126,6 +129,14 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 createPost();
+            }
+        });
+        floatBtnNullImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                photoPost.setImageDrawable(null);
+                selectedPhotoDirectory = null;
+                floatBtnNullImage.setVisibility(View.INVISIBLE);
             }
         });
 
@@ -234,14 +245,14 @@ public class CreatePostActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        selectedPhotoDirectory = null;
-        photoPost.setImageDrawable(null);
+
         if ((requestCode == 1) && (data != null)) {
             selectedPhotoDirectory = data.getData();
             Bitmap bitmap = null;
             try{
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedPhotoDirectory);
                 photoPost.setImageDrawable(new BitmapDrawable(bitmap));
+                floatBtnNullImage.setVisibility(View.VISIBLE);
             }
             catch (IOException e){
 

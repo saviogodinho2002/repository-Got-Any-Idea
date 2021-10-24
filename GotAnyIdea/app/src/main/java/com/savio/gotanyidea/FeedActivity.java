@@ -72,8 +72,10 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feed);
 
         dropList = findViewById(R.id.spin_tags);
+        btnNewPost = findViewById(R.id.btn_newpost);
+        photoUser = findViewById(R.id.img_profilephoto);
 
-        itemsDropList = new String[]{"      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
+        itemsDropList = new String[]{"      #ALLTAGS","      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
          itensDropOptions =  new String[]{"    [OPÇÕES]","      EXCLUIR","      EDITAR"};
           adapterSpinPost = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensDropOptions);
         ArrayAdapter<String> adapterDropList = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itemsDropList);
@@ -86,16 +88,23 @@ public class FeedActivity extends AppCompatActivity {
                     case 0:
                         tags.clear();
                         tags.add("TECNOLOGIA");
+                        tags.add("CULINARIA");
+                        tags.add("GAMBIARRA");
+                        tags.add("ARTES");
                         break;
                     case 1:
                         tags.clear();
-                        tags.add("CULINARIA");
+                        tags.add("TECNOLOGIA");
                         break;
                     case 2:
                         tags.clear();
-                        tags.add("GAMBIARRA");
+                        tags.add("CULINARIA");
                         break;
                     case 3:
+                        tags.clear();
+                        tags.add("GAMBIARRA");
+                        break;
+                    case 4:
                         tags.clear();
                         tags.add("ARTES");
                         break;
@@ -110,7 +119,7 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
 
-        verifyAutentication();
+
         adapter = new GroupAdapter();
 
         tags = new ArrayList<>();
@@ -120,9 +129,8 @@ public class FeedActivity extends AppCompatActivity {
         rv.setLayoutManager(new LinearLayoutManager(FeedActivity.this));
         rv.addItemDecoration(new DividerItemDecoration(FeedActivity.this,LinearLayoutManager.VERTICAL));
         rv.setAdapter(adapter);
+        adapter.clear();
 
-        btnNewPost = findViewById(R.id.btn_newpost);
-        photoUser = findViewById(R.id.img_profilephoto);
 
         btnNewPost.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,7 +138,7 @@ public class FeedActivity extends AppCompatActivity {
                 toCreatePostActivity();
             }
         });
-
+        verifyAutentication();
 
     }
     private void toCreatePostActivity(){
@@ -155,8 +163,12 @@ public class FeedActivity extends AppCompatActivity {
                                 if(doc.getType() == DocumentChange.Type.ADDED){
                                     Posts post = doc.getDocument().toObject(Posts.class);
                                     Log.i("teste","chegou nos docs");
-                                    if( !Collections.disjoint(tags,post.getTag()) ) {
+
+                                    if( !Collections.disjoint(post.getTag(),tags) ) {
                                         Log.i("teste", "DEU CERTO AMEM?");
+                                        Log.i("teste", tags.toString());
+                                        Log.i("teste", post.getTag()
+                                                .toString());
                                         adapter.add(new ItemPost(post));
 
                                     }
@@ -230,23 +242,32 @@ private class ItemPost extends Item<ViewHolder> {
         TextView txtTagPost = viewHolder.getRoot().findViewById(R.id.txt_tag_post);
         ImageView photoPost = viewHolder.getRoot().findViewById(R.id.photo_post);
         TextView txtNumLikes = viewHolder.getRoot().findViewById(R.id.txt_numlikes_post);
+        Button btnAddComent = viewHolder.getRoot().findViewById(R.id.btn_add_coment);
+
          spinner =  viewHolder.getRoot().findViewById(R.id.spin_post_options);
-         spinner.setSelected(false);
+
          spinner.setAdapter(adapterSpinPost);
 
          txtNumLikes.setText(String.valueOf(post.getNumLikes()));
         if(!post.getUserLikedId().contains(me.getUserID()))
-         likeStar.setBackgroundResource(R.drawable.like_icon);
+         likeStar.setBackgroundResource(R.drawable.lampiconoff);
         else
-            likeStar.setBackgroundResource(R.drawable.liked_icon);
+            likeStar.setBackgroundResource(R.drawable.lampiconon);
 
         likeStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                boolean liked;
                 if(!post.getUserLikedId().contains(me.getUserID())){
                     post.getUserLikedId().add(me.getUserID());
                     post.setNumLikes(post.getNumLikes()+1);
+                    liked = true;
+                }
+                else{
+                    liked =false;
+                    post.getUserLikedId().remove(me.getUserID());
+                    post.setNumLikes(post.getNumLikes()-1);
+            }
                     FirebaseFirestore.getInstance().collection("/posts")
                             .document(post.getPostID())
                             .update("userLikedId",post.getUserLikedId())
@@ -260,44 +281,19 @@ private class ItemPost extends Item<ViewHolder> {
                                  .addOnSuccessListener(new OnSuccessListener<Void>() {
                                      @Override
                                      public void onSuccess(Void unused) {
-                                         Log.e("teste","LIKE incrementado");
-                                         likeStar.setBackgroundResource(R.drawable.liked_icon);
-                                         txtNumLikes.setText( String.valueOf( post.getNumLikes()) );
+                                         Log.e("teste","LIKE implementation");
+                                         if(liked) {
+                                             likeStar.setBackgroundResource(R.drawable.lampiconon);
+                                             txtNumLikes.setText(String.valueOf(post.getNumLikes()));
+                                         }else {
+                                             likeStar.setBackgroundResource(R.drawable.lampiconoff);
+                                             txtNumLikes.setText(String.valueOf(post.getNumLikes()));
+                                         }
                                      }
                                  });
 
                                 }
                             });
-
-                }else {
-                    post.getUserLikedId().remove(me.getUserID());
-                    post.setNumLikes(post.getNumLikes()-1);
-                    FirebaseFirestore.getInstance().collection("/posts")
-                            .document(post.getPostID())
-                            .update("userLikedId",post.getUserLikedId())
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    Log.e("teste","LIKE SETADO");
-                                    FirebaseFirestore.getInstance().collection("/posts")
-                                            .document(post.getPostID())
-                                            .update("numLikes",post.getNumLikes())
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void unused) {
-                                                    Log.e("teste","LIKE incrementado");
-                                                    likeStar.setBackgroundResource(R.drawable.like_icon);
-                                                    txtNumLikes.setText( String.valueOf( post.getNumLikes()) );
-                                                }
-                                            });
-
-                                }
-                            });
-
-                }
-
-
-
             }
         });
 
@@ -340,6 +336,16 @@ private class ItemPost extends Item<ViewHolder> {
 
             }
         });
+        btnAddComent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("teste","clicou");
+                Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
+                intent.putExtra("post",post);
+                startActivity(intent);
+            }
+        });
+
 
         if( !post.getFromID().equals(me.getUserID()) )  spinner.setVisibility(View.GONE);
         Picasso.get()
@@ -355,7 +361,9 @@ private class ItemPost extends Item<ViewHolder> {
 
         txtNamePost.setText(post.getFromName());
 
-        if(post.getUrlPhotoPost() != null) {
+        if((post.getUrlPhotoPost() != null) && !post.getUrlPhotoPost().isEmpty()) {
+            Log.e("teste","TEM FOTO");
+            photoPost.setVisibility(View.VISIBLE);
             Picasso.get()
                     .load(post.getUrlPhotoPost())
                     .into(photoPost);

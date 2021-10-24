@@ -26,10 +26,10 @@
                 android:id="@+id/photo_createpost_user"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                app:civ_border_width="2dp"
-                app:civ_border_color="@color/teal_700"
                 android:layout_marginTop="6dp"
                 android:src="@drawable/pf_default"
+                app:civ_border_color="@color/purple1000"
+                app:civ_border_width="2dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.013"
                 app:layout_constraintStart_toStartOf="parent"
@@ -61,8 +61,8 @@
                 app:layout_constraintTop_toTopOf="@+id/photo_createpost_user"
                 app:srcCompat="@drawable/select_photo2_icon"
                 tools:srcCompat="@drawable/select_photo2_icon" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <EditText
             android:id="@+id/cx_createpost_text"
             android:layout_width="match_parent"
@@ -72,14 +72,40 @@
             android:hint="@string/ideiapost"
             android:inputType="textMultiLine|textPersonName" />
 
-        <ImageView
-            android:id="@+id/photo_createpost"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible"
-            tools:src="@tools:sample/avatars" />
+            android:layout_height="match_parent">
 
+            <ImageView
 
+                android:id="@+id/photo_createpost"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@tools:sample/avatars" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/floatbtn_null_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:clickable="true"
+                android:focusableInTouchMode="false"
+                android:foreground="@drawable/x_icon2"
+                app:backgroundTint="#C88E8E8E"
+                app:fabSize="normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:rippleColor="@android:color/holo_red_dark"
+                app:srcCompat="@drawable/x_icon2" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     </LinearLayout>
@@ -87,10 +113,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="100dp"
         app:layout_constraintBottom_toTopOf="@+id/btnPost"
-        tools:layout_editor_absoluteX="-16dp">
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
 
 
         <CheckBox
@@ -99,8 +126,12 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
+            android:buttonTint="@color/purple1000"
             android:text="@string/tagtec"
+            android:textColorHighlight="@color/purple_700"
+            android:textColorLink="@color/purple_700"
+
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -108,10 +139,14 @@
             android:id="@+id/check_tag_culinaria"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="50dp"
             android:layout_marginRight="50dp"
+            android:buttonTint="@color/purple1000"
             android:text="@string/tagculinaria"
+            android:textColorHighlight="@color/purple_700"
+            android:textColorLink="@color/purple_700"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/check_tag_tecnologia"
             app:layout_constraintTop_toTopOf="parent" />
@@ -120,8 +155,12 @@
             android:id="@+id/check_tag_arte"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
+            android:buttonTint="@color/purple1000"
             android:text="@string/tagarte"
+            android:textColorHighlight="@color/purple_700"
+            android:textColorLink="@color/purple_700"
+
             app:layout_constraintStart_toStartOf="@+id/check_tag_tecnologia"
             app:layout_constraintTop_toBottomOf="@+id/check_tag_tecnologia" />
 
@@ -129,8 +168,12 @@
             android:id="@+id/check_tag_gambiarra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
+            android:buttonTint="@color/purple1000"
             android:text="@string/taggamb"
+            android:textColorHighlight="@color/purple_700"
+            android:textColorLink="@color/purple_700"
+
             app:layout_constraintStart_toStartOf="@+id/check_tag_culinaria"
             app:layout_constraintTop_toBottomOf="@+id/check_tag_culinaria" />
 
@@ -140,8 +183,12 @@
         android:id="@+id/btnPost"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_edittext_rounded"
         android:text="@string/post"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/purple1000"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="-13dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

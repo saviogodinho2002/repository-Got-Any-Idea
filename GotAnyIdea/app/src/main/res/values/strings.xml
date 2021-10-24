@@ -17,4 +17,6 @@
     <string name="tagculinaria">CULINARIA</string>
     <string name="numlikes">0</string>
     <string name="comentario">Comentar ...</string>
+    <string name="enviar">enviar</string>
+    <string name="register">criar conta</string>
 </resources>

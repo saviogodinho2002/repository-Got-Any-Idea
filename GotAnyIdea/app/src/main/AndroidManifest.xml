@@ -9,6 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GotAnyIdea">
+        <activity android:name=".ComentActivity"> <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".FeedActivity" /></activity>
         <activity android:name=".CreatePostActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -55,6 +55,8 @@
                     android:background="@drawable/bg_edittext_rounded"
                     android:gravity="center|left"
                     android:text="@string/newpost"
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/purple_700"
                     app:layout_constraintBottom_toBottomOf="@+id/img_profilephoto"
                     app:layout_constraintEnd_toStartOf="@+id/spin_tags"
                     app:layout_constraintStart_toEndOf="@+id/img_profilephoto"

@@ -4,11 +4,11 @@
         android:color="@color/black"
         />
     <gradient
-        android:startColor="@color/purple_700"
+        android:startColor="@color/azul_denim"
         />
     <stroke
         android:width="2.5dp"
-        android:color="@color/black"
+        android:color="@color/cardview_dark_background"
         />
     <corners android:radius="25dp"/>
 

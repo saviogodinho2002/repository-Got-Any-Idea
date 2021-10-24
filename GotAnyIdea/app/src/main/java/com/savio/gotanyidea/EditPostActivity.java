@@ -25,6 +25,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.SuccessContinuation;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -54,6 +55,7 @@ public class EditPostActivity extends AppCompatActivity {
     private  Posts postFromIntent;
     private User me;
     private List<String> userLikeID;
+    private FloatingActionButton floatBtnNullImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +64,7 @@ public class EditPostActivity extends AppCompatActivity {
         checkBoxesList =  new ArrayList<>();
         userLikeID = new ArrayList<>();
         selectedPhotoDirectory = null;
+        floatBtnNullImage = findViewById(R.id.floatbtn_null_image);
 
         chkCulinaria = findViewById(R.id.check_tag_culinaria);
         chkTecnologia = findViewById(R.id.check_tag_tecnologia);
@@ -82,6 +85,7 @@ public class EditPostActivity extends AppCompatActivity {
         txtUserName = findViewById(R.id.txt_createpost_name);
 
         btnPost = findViewById(R.id.btnPost);
+        floatBtnNullImage.setVisibility(View.INVISIBLE);
         verifyAutentication();
 
         photoSelect.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +99,7 @@ public class EditPostActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
                    tags.add(chkTecnologia.getText().toString());
-              //  tag = chkTecnologia.getText().toString();
+
                 }else  tags.remove(chkTecnologia.getText().toString());
             }
         });
@@ -135,8 +139,31 @@ public class EditPostActivity extends AppCompatActivity {
 
 
         Log.e("teste","ENTROU EM EDIT");
-       postID = getIntent().getExtras().getString("postID") ;
+         postID = getIntent().getExtras().getString("postID") ;
         fetchPostData();
+
+
+
+        floatBtnNullImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(postFromIntent.getUrlPhotoPost() != null && !postFromIntent.getUrlPhotoPost().isEmpty()){
+                    FirebaseStorage.getInstance().getReference("/images-post/"+postFromIntent.getPhotoPostFileName())
+                            .delete()
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    postFromIntent.setUrlPhotoPost(null);
+                                    postFromIntent.setPhotoPostFileName(null);
+                                }
+                            });
+
+                }
+                photoPost.setImageDrawable(null);
+                selectedPhotoDirectory = null;
+                floatBtnNullImage.setVisibility(View.INVISIBLE);
+            }
+        });
     }
     private void fetchPostData(){
         Log.e("teste","FETCHIN POSTS");
@@ -156,7 +183,8 @@ public class EditPostActivity extends AppCompatActivity {
                     Picasso.get()
                             .load(postFromIntent.getUrlPhotoPost())
                             .into(photoPost);
-                }
+                    floatBtnNullImage.setVisibility(View.VISIBLE);
+                }else floatBtnNullImage.setVisibility(View.INVISIBLE);
                 cxTextoPost.setText(postFromIntent.getPostText());
                 List<String> tagsList = postFromIntent.getTag();
                 userLikeID = postFromIntent.getUserLikedId();
@@ -190,19 +218,19 @@ public class EditPostActivity extends AppCompatActivity {
             Toast.makeText(EditPostActivity.this, "Insira um texto", Toast.LENGTH_SHORT).show();
             return;
         }
-        String filename = UUID.randomUUID().toString();
-        final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
 
         String meUserName = me.getName();
         String meId = me.getUserID();
         String urlPhotoUser = me.getUrlProfilePhoto();
         long timestamp = System.currentTimeMillis();
         Posts post = new Posts();
+
         if((userLikeID != null) && (!userLikeID.isEmpty()) )   post.setUserLikedId(userLikeID);
+
         post.setNumLikes(postFromIntent.getNumLikes());
         post.setTag(tags);
         post.setFromName(meUserName);
-        post.setTimestamp(timestamp);
+        post.setTimestamp(postFromIntent.getTimestamp());
         post.setFromID(meId);
         post.setPostID(postID);
         post.setPostText(textoPost);
@@ -217,11 +245,37 @@ public class EditPostActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                       FirebaseStorage.getInstance().getReference("/images-posts/"+post.getPhotoPostFileName()).delete();
+                        if ((postFromIntent.getUrlPhotoPost() != null) && (!postFromIntent.getUrlPhotoPost().isEmpty())) {
+                            FirebaseFirestore.getInstance().collection("/posts")
+                                    .document(post.getPostID())
+                                    .update("urlPhotoPost", postFromIntent.getUrlPhotoPost())
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            FirebaseFirestore.getInstance().collection("/posts")
+                                                    .document(post.getPostID())
+                                                    .update("photoPostFileName",postFromIntent.getPhotoPostFileName())
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull  Task<Void> task) {
+                                                            startActivity(intent);
+                                                            return;
+                                                        }
+                                                    });
+
+                                        }
+                                    });
+
+                            return;
+                        }
+
                         Log.e("teste","DELETOU IMG ANTEIROR");
 
-                        if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
+                        if ((selectedPhotoDirectory != null) && (!selectedPhotoDirectory.toString().isEmpty())) {
+                            String filename = UUID.randomUUID().toString();
+                            final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
                             Log.e("teste","UPANDO  NOVA IMG");
+                            FirebaseStorage.getInstance().getReference("/images-posts/"+post.getPhotoPostFileName()).delete();
                             ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -280,14 +334,14 @@ public class EditPostActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        selectedPhotoDirectory = null;
-        photoPost.setImageDrawable(null);
+
         if ((requestCode == 1) && (data != null)) {
             selectedPhotoDirectory = data.getData();
             Bitmap bitmap = null;
             try{
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),selectedPhotoDirectory);
                 photoPost.setImageDrawable(new BitmapDrawable(bitmap));
+                floatBtnNullImage.setVisibility(View.VISIBLE);
             }
             catch (IOException e){
 

@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Posts  {
+public class Posts  implements Parcelable{
     private String fromID;
 
     private String fromName;
@@ -27,6 +27,32 @@ public class Posts  {
         tag = new ArrayList<>();
         userLikedId = new ArrayList<>();
     }
+
+    protected Posts(Parcel in) {
+        fromID = in.readString();
+        fromName = in.readString();
+        postID = in.readString();
+        photoPostFileName = in.readString();
+        tag = in.createStringArrayList();
+        timestamp = in.readLong();
+        urlPhotoPost = in.readString();
+        urlPhotoUser = in.readString();
+        postText = in.readString();
+        numLikes = in.readInt();
+        userLikedId = in.createStringArrayList();
+    }
+
+    public static final Creator<Posts> CREATOR = new Creator<Posts>() {
+        @Override
+        public Posts createFromParcel(Parcel in) {
+            return new Posts(in);
+        }
+
+        @Override
+        public Posts[] newArray(int size) {
+            return new Posts[size];
+        }
+    };
 
     public int getNumLikes() {
         return numLikes;
@@ -118,5 +144,25 @@ public class Posts  {
 
     public void setPostID(String postID) {
         this.postID = postID;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(fromID);
+        dest.writeString(fromName);
+        dest.writeString(postID);
+        dest.writeString(photoPostFileName);
+        dest.writeStringList(tag);
+        dest.writeLong(timestamp);
+        dest.writeString(urlPhotoPost);
+        dest.writeString(urlPhotoUser);
+        dest.writeString(postText);
+        dest.writeInt(numLikes);
+        dest.writeStringList(userLikedId);
     }
 }
