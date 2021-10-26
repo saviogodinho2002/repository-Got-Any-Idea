@@ -152,8 +152,7 @@ public class CreatePostActivity extends AppCompatActivity {
             Toast.makeText(CreatePostActivity.this, "Insira um texto", Toast.LENGTH_SHORT).show();
             return;
         }
-        String filename = UUID.randomUUID().toString();
-        final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
+
 
         String meUserName = me.getName();
         String meId = me.getUserID();
@@ -169,72 +168,61 @@ public class CreatePostActivity extends AppCompatActivity {
         post.setUrlPhotoUser(urlPhotoUser);
         post.setNumLikes(0);
 
+
         Intent intent = new Intent(CreatePostActivity.this, FeedActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        Log.e("teste","chegou ate aqui?");
-        FirebaseFirestore.getInstance().collection("/posts")
-                .add(post)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.e("teste","UPOU O POST");
-                        FirebaseFirestore.getInstance().collection("/posts")
-                                .document(documentReference.getId())
-                                .update("postID",documentReference.getId());
+        String postID = UUID.randomUUID().toString();
+        post.setPostID(postID);
 
-                        if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
-                            Log.e("teste","UPANDO IMG");
-                            ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    Log.e("teste","baixar IMG");
-                                    ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        Log.e("teste","chegou ate aqui?");
+        if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
+            String filename = UUID.randomUUID().toString();
+            final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
+
+            Log.e("teste", "UPANDO IMG");
+            ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Log.e("teste", "baixar IMG");
+                    ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            post.setUrlPhotoPost(uri.toString());
+                            post.setPhotoPostFileName(filename);
+
+                            FirebaseFirestore.getInstance().collection("/posts")
+                                    .document(postID)
+                                    .set(post)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
-                                        public void onSuccess(Uri uri) {
-                                            Log.e("teste","baixou");
-                                            FirebaseFirestore.getInstance().collection("/posts")
-                                                    .document(documentReference.getId())
-                                                    .update("urlPhotoPost", uri.toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void unused) {
-                                                   FirebaseFirestore.getInstance().collection("/posts")
-                                                           .document(documentReference.getId())
-                                                           .update("photoPostFileName",filename).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                       @Override
-                                                       public void onComplete(@NonNull Task<Void> task) {
-                                                                    startActivity(intent);
-                                                       }
-                                                   });
-                                                }
-                                            });
-                                        }
-                                    }).addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.e("teste","ERRO AO BAIXAR A REF");
+                                        public void onSuccess(Void unused) {
+                                            startActivity(intent);
                                         }
                                     });
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull  Exception e) {
-                                    Log.e("teste","ERRO AO POR A FODA");
-                                }
-                            });
-                        }else{
 
-                        startActivity(intent);
                         }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull  Exception e) {
-                Log.e("teste",e.getMessage());
-            }
-        });
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e("teste", "ERRO AO BAIXAR A REF");
+                }
+            });
+        }else {
+            FirebaseFirestore.getInstance().collection("/posts")
+                    .document(postID)
+                    .set(post)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            startActivity(intent);
+                        }
+                    });
 
         }
+    }
 
     private void selectPhoto(){
         Intent intent = new Intent(Intent.ACTION_PICK);

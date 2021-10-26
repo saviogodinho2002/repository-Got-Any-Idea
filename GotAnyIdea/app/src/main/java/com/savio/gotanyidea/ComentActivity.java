@@ -113,9 +113,13 @@ public class ComentActivity extends AppCompatActivity {
         Picasso.get()
                 .load(post.getUrlPhotoUser())
                 .into(photoUser);
+        if((post.getUrlPhotoPost() == null) || (post.getUrlPhotoPost().isEmpty())) {
+            photoPost.setVisibility(View.GONE);
+        }else{
         Picasso.get()
                 .load(post.getUrlPhotoPost())
                 .into(photoPost);
+        }
        fetchComentarios();
     }
     private void fetchComentarios(){
@@ -128,11 +132,15 @@ public class ComentActivity extends AppCompatActivity {
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@Nullable  QuerySnapshot value, FirebaseFirestoreException error) {
+
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
+
                             for (DocumentChange doc:
                                  documentChanges) {
-                                Coment coment = doc.getDocument().toObject(Coment.class);
-                                adapter.add(new ItemComent(coment));
+                                if(doc.getType() == DocumentChange.Type.ADDED) {
+                                    Coment coment = doc.getDocument().toObject(Coment.class);
+                                    adapter.add(new ItemComent(coment));
+                                }
                             }
                         }
                     });
@@ -195,6 +203,9 @@ public class ComentActivity extends AppCompatActivity {
             TextView txtComentText = viewHolder.getRoot().findViewById(R.id.txt_textocoment_coment);
             ImageView photoUserComent = viewHolder.getRoot().findViewById(R.id.img_photoUser_coment);
             Spinner spinner = viewHolder.getRoot().findViewById(R.id.spinner_coment);
+
+            if( (post.getFromID().equals(me.getUserID()) ) || (coment.getUserComentID().equals(me.getUserID()))) spinner.setVisibility(View.VISIBLE);
+            else spinner.setVisibility(View.GONE);
 
             spinner.setAdapter(adapterSpinComent);
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

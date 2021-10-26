@@ -19,4 +19,9 @@
     <string name="comentario">Comentar ...</string>
     <string name="enviar">enviar</string>
     <string name="register">criar conta</string>
+    <string name="createlabel">Nova publicação</string>
+    <string name="editlabel">Editar publicação</string>
+    <string name="registerlabel">Registre - se</string>
+    <string name="loginlabel">Login</string>
+    <string name="comentlabel">Comentários</string>
 </resources>

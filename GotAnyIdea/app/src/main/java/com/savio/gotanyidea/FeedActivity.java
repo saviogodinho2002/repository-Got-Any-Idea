@@ -40,6 +40,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.iid.FirebaseInstanceIdReceiver;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -65,12 +66,13 @@ public class FeedActivity extends AppCompatActivity {
     private Spinner dropList;
     private String[] itemsDropList;
     private String[] itensDropOptions;
+    private int nextIndexAdapter;
     ArrayAdapter<String> adapterSpinPost;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
-
+        nextIndexAdapter = 0;
         dropList = findViewById(R.id.spin_tags);
         btnNewPost = findViewById(R.id.btn_newpost);
         photoUser = findViewById(R.id.img_profilephoto);
@@ -145,11 +147,8 @@ public class FeedActivity extends AppCompatActivity {
         Intent intent =  new Intent(FeedActivity.this,CreatePostActivity.class);
         startActivity(intent);
     }
-    private void deletePost(){
 
-    }
     private void fethPosts(){
-
         if(me != null){
             adapter.clear();
             FirebaseFirestore.getInstance().collection("/posts")
@@ -159,17 +158,20 @@ public class FeedActivity extends AppCompatActivity {
                         public void onEvent(@Nullable  QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
 
-                            for (DocumentChange doc: documentChanges){
-                                if(doc.getType() == DocumentChange.Type.ADDED){
-                                    Posts post = doc.getDocument().toObject(Posts.class);
-                                    Log.i("teste","chegou nos docs");
+                              for (DocumentChange doc: documentChanges){
+
+                                Posts post = doc.getDocument().toObject(Posts.class);
+                              if((doc.getType() == DocumentChange.Type.ADDED) ){
 
                                     if( !Collections.disjoint(post.getTag(),tags) ) {
-                                        Log.i("teste", "DEU CERTO AMEM?");
-                                        Log.i("teste", tags.toString());
-                                        Log.i("teste", post.getTag()
-                                                .toString());
-                                        adapter.add(new ItemPost(post));
+
+                                        if((documentChanges.size() <= 1 )){
+                                            if(adapter.getItemCount() == 0)
+                                                adapter.add(new ItemPost(post));
+                                            else return;
+
+                                        }else
+                                            adapter.add(new ItemPost(post));
 
                                     }
 
@@ -181,6 +183,7 @@ public class FeedActivity extends AppCompatActivity {
         }
 
     }
+
 
     private void verifyAutentication(){
         if(FirebaseAuth.getInstance().getUid() == null){
@@ -223,6 +226,10 @@ public class FeedActivity extends AppCompatActivity {
         }
         return true;
     }
+    private void  fetchsla(ItemPost item){
+
+    }
+
 
 private class ItemPost extends Item<ViewHolder> {
         Posts post;
@@ -289,6 +296,7 @@ private class ItemPost extends Item<ViewHolder> {
                                              likeStar.setBackgroundResource(R.drawable.lampiconoff);
                                              txtNumLikes.setText(String.valueOf(post.getNumLikes()));
                                          }
+
                                      }
                                  });
 
@@ -309,7 +317,7 @@ private class ItemPost extends Item<ViewHolder> {
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        fethPosts();
+                                        adapter.removeGroup(adapter.getAdapterPosition(ItemPost.this));
                                         Log.e("teste","excluiu porra");
                                         final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+post.getPhotoPostFileName());
                                         ref.delete();
@@ -348,6 +356,7 @@ private class ItemPost extends Item<ViewHolder> {
 
 
         if( !post.getFromID().equals(me.getUserID()) )  spinner.setVisibility(View.GONE);
+        else spinner.setVisibility(View.VISIBLE);
         Picasso.get()
                 .load(post.getUrlPhotoUser())
                 .into(photoUserPost);

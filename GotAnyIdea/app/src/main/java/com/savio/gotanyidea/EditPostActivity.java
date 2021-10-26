@@ -239,32 +239,20 @@ public class EditPostActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
         Log.e("teste","chegou ate aqui?");
-        FirebaseFirestore.getInstance().collection("/posts")
-                .document(postID)
-                .set(post)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+
                         if ((postFromIntent.getUrlPhotoPost() != null) && (!postFromIntent.getUrlPhotoPost().isEmpty())) {
+                            post.setUrlPhotoPost(postFromIntent.getUrlPhotoPost());
+                            post.setPhotoPostFileName(postFromIntent.getPhotoPostFileName());
                             FirebaseFirestore.getInstance().collection("/posts")
-                                    .document(post.getPostID())
-                                    .update("urlPhotoPost", postFromIntent.getUrlPhotoPost())
+                                    .document(postID)
+                                    .set(post)
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void unused) {
-                                            FirebaseFirestore.getInstance().collection("/posts")
-                                                    .document(post.getPostID())
-                                                    .update("photoPostFileName",postFromIntent.getPhotoPostFileName())
-                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull  Task<Void> task) {
-                                                            startActivity(intent);
-                                                            return;
-                                                        }
-                                                    });
-
+                                            startActivity(intent);
                                         }
                                     });
+
 
                             return;
                         }
@@ -275,7 +263,6 @@ public class EditPostActivity extends AppCompatActivity {
                             String filename = UUID.randomUUID().toString();
                             final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
                             Log.e("teste","UPANDO  NOVA IMG");
-                            FirebaseStorage.getInstance().getReference("/images-posts/"+post.getPhotoPostFileName()).delete();
                             ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -283,45 +270,39 @@ public class EditPostActivity extends AppCompatActivity {
                                     ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                         @Override
                                         public void onSuccess(Uri uri) {
-                                            Log.e("teste","baixou");
+                                            post.setUrlPhotoPost(uri.toString());
+                                            post.setPhotoPostFileName(filename);
                                             FirebaseFirestore.getInstance().collection("/posts")
-                                                    .document(post.getPostID())
-                                                    .update("urlPhotoPost", uri.toString()).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void unused) {
-                                                    FirebaseFirestore.getInstance().collection("/posts")
-                                                            .document(post.getPostID())
-                                                            .update("photoPostFileName",filename)
-                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                @Override
-                                                                public void onSuccess(Void unused) {
-                                                                    startActivity(intent);
-                                                                }
-                                                            });
+                                                    .document(postID)
+                                                    .set(post)
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void unused) {
+                                                            startActivity(intent);
+                                                            return;
+                                                        }
+                                                    });
                                                 }
                                             });
                                         }
-                                    }).addOnFailureListener(new OnFailureListener() {
+                                    });
+                        }else{
+                            FirebaseFirestore.getInstance().collection("/posts")
+                                    .document(postID)
+                                    .set(post)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.e("teste","ERRO AO BAIXAR A REF");
+                                        public void onSuccess(Void unused) {
+                                            startActivity(intent);
                                         }
                                     });
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull  Exception e) {
-                                    Log.e("teste","ERRO AO POR A FODA");
-                                }
-                            });
-                        }else{
 
-                        startActivity(intent);
+                        return;
                         }
 
 
-                    }
-                });
+
+
 
         }
 
