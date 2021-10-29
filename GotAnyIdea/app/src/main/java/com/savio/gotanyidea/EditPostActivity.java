@@ -130,9 +130,12 @@ public class EditPostActivity extends AppCompatActivity {
                 }else tags.remove(chkCulinaria.getText().toString());
             }
         });
+        btnPost.setClickable(true);
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 createPost();
             }
         });
@@ -222,7 +225,7 @@ public class EditPostActivity extends AppCompatActivity {
         String meUserName = me.getName();
         String meId = me.getUserID();
         String urlPhotoUser = me.getUrlProfilePhoto();
-        long timestamp = System.currentTimeMillis();
+
         Posts post = new Posts();
 
         if((userLikeID != null) && (!userLikeID.isEmpty()) )   post.setUserLikedId(userLikeID);
@@ -237,7 +240,8 @@ public class EditPostActivity extends AppCompatActivity {
         post.setUrlPhotoUser(urlPhotoUser);
         Intent intent = new Intent(EditPostActivity.this, FeedActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-
+        btnPost.setClickable(false);
+        Toast.makeText(EditPostActivity.this,"Postando, aguarde",Toast.LENGTH_LONG).show();
         Log.e("teste","chegou ate aqui?");
 
                         if ((postFromIntent.getUrlPhotoPost() != null) && (!postFromIntent.getUrlPhotoPost().isEmpty())) {

@@ -7,7 +7,7 @@ public class User implements Parcelable {
     private String name;
     private String userID;
     private String urlProfilePhoto;
-    private String token;
+
 
     public User() {
 
@@ -17,7 +17,7 @@ public class User implements Parcelable {
         name = in.readString();
         userID = in.readString();
         urlProfilePhoto = in.readString();
-        token = in.readString();
+
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -56,13 +56,6 @@ public class User implements Parcelable {
         this.urlProfilePhoto = urlProfilePhoto;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 
     @Override
     public int describeContents() {
@@ -74,6 +67,6 @@ public class User implements Parcelable {
         dest.writeString(name);
         dest.writeString(userID);
         dest.writeString(urlProfilePhoto);
-        dest.writeString(token);
+
     }
 }

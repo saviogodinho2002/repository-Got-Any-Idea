@@ -125,9 +125,11 @@ public class CreatePostActivity extends AppCompatActivity {
                 }else tags.remove(chkCulinaria.getText().toString());
             }
         });
+        btnPost.setClickable(true);
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 createPost();
             }
         });
@@ -152,7 +154,7 @@ public class CreatePostActivity extends AppCompatActivity {
             Toast.makeText(CreatePostActivity.this, "Insira um texto", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        btnPost.setClickable(false);
 
         String meUserName = me.getName();
         String meId = me.getUserID();
@@ -175,6 +177,7 @@ public class CreatePostActivity extends AppCompatActivity {
         String postID = UUID.randomUUID().toString();
         post.setPostID(postID);
 
+        Toast.makeText(CreatePostActivity.this,"Postando, aguarde",Toast.LENGTH_LONG).show();
         Log.e("teste","chegou ate aqui?");
         if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
             String filename = UUID.randomUUID().toString();

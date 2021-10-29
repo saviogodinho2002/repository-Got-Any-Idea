@@ -226,9 +226,7 @@ public class FeedActivity extends AppCompatActivity {
         }
         return true;
     }
-    private void  fetchsla(ItemPost item){
 
-    }
 
 
 private class ItemPost extends Item<ViewHolder> {

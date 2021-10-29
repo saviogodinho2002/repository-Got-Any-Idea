@@ -135,8 +135,7 @@ public class ComentActivity extends AppCompatActivity {
 
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
 
-                            for (DocumentChange doc:
-                                 documentChanges) {
+                            for (DocumentChange doc: documentChanges) {
                                 if(doc.getType() == DocumentChange.Type.ADDED) {
                                     Coment coment = doc.getDocument().toObject(Coment.class);
                                     adapter.add(new ItemComent(coment));
@@ -164,27 +163,20 @@ public class ComentActivity extends AppCompatActivity {
         coment.setTimestamp(timestamp);
         coment.setUserComentID(me.getUserID());
 
+        String comentID = UUID.randomUUID().toString();
+        coment.setComentID(comentID);
+
         FirebaseFirestore.getInstance().collection("/posts")
                 .document(post.getPostID())
                 .collection("coments")
-                .add(coment)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        FirebaseFirestore.getInstance().collection("/posts")
-                                .document(post.getPostID())
-                                .collection("coments")
-                                .document(documentReference.getId())
-                                .update("comentID",documentReference.getId())
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        fetchComentarios();
-                                    }
-                                });
+                .document(comentID)
+                .set(coment).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
 
-                    }
-                });
+
+            }
+        });
 
 
 
@@ -221,7 +213,7 @@ public class ComentActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void unused) {
-                                            fetchComentarios();
+                                            adapter.removeGroup(adapter.getAdapterPosition(ComentActivity.ItemComent.this));
                                         }
                                     });
                             break;
