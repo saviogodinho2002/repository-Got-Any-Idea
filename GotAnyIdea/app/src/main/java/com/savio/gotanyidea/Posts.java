@@ -8,18 +8,12 @@ import java.util.List;
 
 public class Posts  implements Parcelable{
     private String fromID;
-
-    private String fromName;
-
     private String postID;
     private String photoPostFileName;
     private List<String> tag;
     private long timestamp;
     private String urlPhotoPost;
-
-    private String urlPhotoUser;
     private String postText;
-
     private int numLikes;
     private List<String> userLikedId;
 
@@ -30,13 +24,13 @@ public class Posts  implements Parcelable{
 
     protected Posts(Parcel in) {
         fromID = in.readString();
-        fromName = in.readString();
+
         postID = in.readString();
         photoPostFileName = in.readString();
         tag = in.createStringArrayList();
         timestamp = in.readLong();
         urlPhotoPost = in.readString();
-        urlPhotoUser = in.readString();
+
         postText = in.readString();
         numLikes = in.readInt();
         userLikedId = in.createStringArrayList();
@@ -80,22 +74,6 @@ public class Posts  implements Parcelable{
     }
 
 
-    public String getFromName() {
-        return fromName;
-    }
-
-    public void setFromName(String fromName) {
-        this.fromName = fromName;
-    }
-
-
-    public String getUrlPhotoUser() {
-        return urlPhotoUser;
-    }
-
-    public void setUrlPhotoUser(String urlPhotoUser) {
-        this.urlPhotoUser = urlPhotoUser;
-    }
 
     public String getPhotoPostFileName() {
         return photoPostFileName;
@@ -154,13 +132,13 @@ public class Posts  implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(fromID);
-        dest.writeString(fromName);
+
         dest.writeString(postID);
         dest.writeString(photoPostFileName);
         dest.writeStringList(tag);
         dest.writeLong(timestamp);
         dest.writeString(urlPhotoPost);
-        dest.writeString(urlPhotoUser);
+
         dest.writeString(postText);
         dest.writeInt(numLikes);
         dest.writeStringList(userLikedId);

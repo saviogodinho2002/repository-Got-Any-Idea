@@ -24,4 +24,9 @@
     <string name="registerlabel">Registre - se</string>
     <string name="loginlabel">Login</string>
     <string name="comentlabel">Comentários</string>
+    <string name="profilelabel">Perfil</string>
+    <string name="delaccout">🗑️ Deletar conta</string>
+    <string name="aditlabel">Editar</string>
+    <string name="logout">logout</string>
+    <string name="btneditprofile">✏️Editar perfil</string>
 </resources>

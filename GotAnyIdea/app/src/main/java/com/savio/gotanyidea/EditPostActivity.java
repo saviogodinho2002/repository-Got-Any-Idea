@@ -232,12 +232,12 @@ public class EditPostActivity extends AppCompatActivity {
 
         post.setNumLikes(postFromIntent.getNumLikes());
         post.setTag(tags);
-        post.setFromName(meUserName);
+
         post.setTimestamp(postFromIntent.getTimestamp());
         post.setFromID(meId);
         post.setPostID(postID);
         post.setPostText(textoPost);
-        post.setUrlPhotoUser(urlPhotoUser);
+
         Intent intent = new Intent(EditPostActivity.this, FeedActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         btnPost.setClickable(false);

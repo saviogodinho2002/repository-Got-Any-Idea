@@ -69,7 +69,7 @@ public class ComentActivity extends AppCompatActivity {
         photoPost = findViewById(R.id.img_photoPost_coment);
         rv = findViewById(R.id.recycler_coments);
         post =(Posts) getIntent().getParcelableExtra("post");
-        Log.e("teste",post.getFromName());
+
         verifyAutentication();
         adapter = new GroupAdapter();
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -84,6 +84,19 @@ public class ComentActivity extends AppCompatActivity {
         });
         itensSpinnerComent = new String[]{"     [OPÇÕES]","      EXCLUIR"};
         adapterSpinComent = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensSpinnerComent);
+
+        photoUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity(post.getFromID());
+            }
+        });
+        txtUserName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity(post.getFromID());
+            }
+        });
     }
     private void verifyAutentication(){
         if(FirebaseAuth.getInstance().getUid() == null){
@@ -108,19 +121,31 @@ public class ComentActivity extends AppCompatActivity {
     }
     private void fetchPost(){
         Log.e("teste","fetcubcinebts");
-        txtUserName.setText(post.getFromName());
-        txtPostText.setText(post.getPostText());
-        Picasso.get()
-                .load(post.getUrlPhotoUser())
-                .into(photoUser);
-        if((post.getUrlPhotoPost() == null) || (post.getUrlPhotoPost().isEmpty())) {
-            photoPost.setVisibility(View.GONE);
-        }else{
-        Picasso.get()
-                .load(post.getUrlPhotoPost())
-                .into(photoPost);
-        }
-       fetchComentarios();
+        FirebaseFirestore.getInstance().collection("users")
+                .document(post.getFromID())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        User userPost = documentSnapshot.toObject(User.class);
+                        txtUserName.setText(userPost.getName());
+                        txtPostText.setText(post.getPostText());
+                        Picasso.get()
+                                .load(userPost.getUrlProfilePhoto())
+                                .into(photoUser);
+                        if((post.getUrlPhotoPost() == null) || (post.getUrlPhotoPost().isEmpty())) {
+                            photoPost.setVisibility(View.GONE);
+                        }else{
+                            Picasso.get()
+                                    .load(post.getUrlPhotoPost())
+                                    .into(photoPost);
+
+                        }
+                        fetchComentarios();
+                    }
+                });
+
+
     }
     private void fetchComentarios(){
         if(me != null){
@@ -134,11 +159,22 @@ public class ComentActivity extends AppCompatActivity {
                         public void onEvent(@Nullable  QuerySnapshot value, FirebaseFirestoreException error) {
 
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
-
+                            Log.e("teste","PEGOU LISTA DE COMENTARIOS");
                             for (DocumentChange doc: documentChanges) {
                                 if(doc.getType() == DocumentChange.Type.ADDED) {
                                     Coment coment = doc.getDocument().toObject(Coment.class);
-                                    adapter.add(new ItemComent(coment));
+                                    FirebaseFirestore.getInstance().collection("/users")
+                                            .document(coment.getFromtID())
+                                            .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                                            User userComent = documentSnapshot.toObject(User.class);
+                                            adapter.add(new ItemComent(coment,userComent));
+                                            Log.e("teste","FETCHCOMENTARIO");
+                                        }
+                                    });
+
                                 }
                             }
                         }
@@ -157,12 +193,9 @@ public class ComentActivity extends AppCompatActivity {
         cxTextComent.setText(null);
         long timestamp = System.currentTimeMillis();
         Coment coment =  new Coment();
-        coment.setUserNameComent(me.getName());
-        coment.setUrlProfilePhotoComent(me.getUrlProfilePhoto());
         coment.setComentText(text);
         coment.setTimestamp(timestamp);
-        coment.setUserComentID(me.getUserID());
-
+        coment.setFromtID(me.getUserID());
         String comentID = UUID.randomUUID().toString();
         coment.setComentID(comentID);
 
@@ -181,12 +214,20 @@ public class ComentActivity extends AppCompatActivity {
 
 
     }
+    private void profileActivity(String userID){
+        Intent intent = new Intent(ComentActivity.this,ProfileActivity.class);
+        intent.putExtra("userID",userID);
+        startActivity(intent);
+    }
 
     private class ItemComent extends Item<ViewHolder> {
         Coment coment;
+        User userComent;
 
-        public ItemComent(Coment coment) {
+        public ItemComent(Coment coment,User userComent)
+        {
             this.coment = coment;
+            this.userComent = userComent;
         }
 
         @Override
@@ -196,7 +237,7 @@ public class ComentActivity extends AppCompatActivity {
             ImageView photoUserComent = viewHolder.getRoot().findViewById(R.id.img_photoUser_coment);
             Spinner spinner = viewHolder.getRoot().findViewById(R.id.spinner_coment);
 
-            if( (post.getFromID().equals(me.getUserID()) ) || (coment.getUserComentID().equals(me.getUserID()))) spinner.setVisibility(View.VISIBLE);
+            if( (post.getFromID().equals(me.getUserID()) ) || (coment.getFromtID().equals(me.getUserID()))) spinner.setVisibility(View.VISIBLE);
             else spinner.setVisibility(View.GONE);
 
             spinner.setAdapter(adapterSpinComent);
@@ -228,10 +269,22 @@ public class ComentActivity extends AppCompatActivity {
             });
 
             txtComentText.setText(coment.getComentText());
-            txtName.setText(coment.getUserNameComent());
+            txtName.setText(userComent.getName());
             Picasso.get()
-                    .load(coment.getUrlProfilePhotoComent())
+                    .load(userComent.getUrlProfilePhoto())
                     .into(photoUserComent);
+            txtName.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    profileActivity(coment.getFromtID());
+                }
+            });
+            photoUserComent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    profileActivity(coment.getFromtID());
+                }
+            });
 
         }
 

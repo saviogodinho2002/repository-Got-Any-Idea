@@ -9,10 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.os.Build;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -46,12 +43,11 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.xwray.groupie.GroupAdapter;
 import com.xwray.groupie.Item;
-import com.xwray.groupie.OnItemClickListener;
-import com.xwray.groupie.OnItemLongClickListener;
+
 import com.xwray.groupie.ViewHolder;
 
 import java.util.ArrayList;
-import java.util.Collection;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -66,13 +62,12 @@ public class FeedActivity extends AppCompatActivity {
     private Spinner dropList;
     private String[] itemsDropList;
     private String[] itensDropOptions;
-    private int nextIndexAdapter;
     ArrayAdapter<String> adapterSpinPost;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
-        nextIndexAdapter = 0;
+
         dropList = findViewById(R.id.spin_tags);
         btnNewPost = findViewById(R.id.btn_newpost);
         photoUser = findViewById(R.id.img_profilephoto);
@@ -140,6 +135,14 @@ public class FeedActivity extends AppCompatActivity {
                 toCreatePostActivity();
             }
         });
+        photoUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity(me.getUserID());
+            }
+        });
+
+
         verifyAutentication();
 
     }
@@ -166,12 +169,31 @@ public class FeedActivity extends AppCompatActivity {
                                     if( !Collections.disjoint(post.getTag(),tags) ) {
 
                                         if((documentChanges.size() <= 1 )){
-                                            if(adapter.getItemCount() == 0)
-                                                adapter.add(new ItemPost(post));
+                                            if(adapter.getItemCount() == 0) {
+                                                FirebaseFirestore.getInstance().collection("users")
+                                                        .document(post.getFromID())
+                                                        .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                        User userpost = documentSnapshot.toObject(User.class);
+                                                        adapter.add(new ItemPost(post,userpost));
+                                                    }
+                                                });
+
+                                            }
+
                                             else return;
 
-                                        }else
-                                            adapter.add(new ItemPost(post));
+                                        }else{
+                                            FirebaseFirestore.getInstance().collection("users")
+                                                    .document(post.getFromID())
+                                                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                    User userpost = documentSnapshot.toObject(User.class);
+                                                    adapter.add(new ItemPost(post,userpost));
+                                                }
+                                            });}
 
                                     }
 
@@ -223,23 +245,31 @@ public class FeedActivity extends AppCompatActivity {
                 FirebaseAuth.getInstance().signOut();
                 verifyAutentication();
                 break;
+
         }
         return true;
+    }
+    private void profileActivity(String userID){
+        Intent intent = new Intent(FeedActivity.this,ProfileActivity.class);
+
+        intent.putExtra("userID",userID);
+        startActivity(intent);
     }
 
 
 
 private class ItemPost extends Item<ViewHolder> {
         Posts post;
+        User userPost;
 
-    public ItemPost(Posts post) {
+    public ItemPost(Posts post,User userPost) {
         this.post = post;
+        this.userPost = userPost;
     }
     private Spinner spinner;
-    private int numLikes;
-    private List<String> userLikedId;
     @Override
     public void bind(@NonNull  ViewHolder viewHolder, int position) {
+
         ImageView likeStar = viewHolder.getRoot().findViewById(R.id.photo_like_star);
         ImageView photoUserPost = viewHolder.getRoot().findViewById(R.id.photo_user_post);
         TextView txtPost = viewHolder.getRoot().findViewById(R.id.txt_post);
@@ -356,7 +386,7 @@ private class ItemPost extends Item<ViewHolder> {
         if( !post.getFromID().equals(me.getUserID()) )  spinner.setVisibility(View.GONE);
         else spinner.setVisibility(View.VISIBLE);
         Picasso.get()
-                .load(post.getUrlPhotoUser())
+                .load(userPost.getUrlProfilePhoto())
                 .into(photoUserPost);
 
         txtTagPost.setText("");
@@ -366,7 +396,7 @@ private class ItemPost extends Item<ViewHolder> {
 
         txtPost.setText(post.getPostText());
 
-        txtNamePost.setText(post.getFromName());
+        txtNamePost.setText(userPost.getName());
 
         if((post.getUrlPhotoPost() != null) && !post.getUrlPhotoPost().isEmpty()) {
             Log.e("teste","TEM FOTO");
@@ -378,6 +408,22 @@ private class ItemPost extends Item<ViewHolder> {
         }else {
            photoPost.setVisibility(View.GONE);
         }
+
+        photoUserPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity(post.getFromID());
+            }
+        });
+
+        txtNamePost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity(post.getFromID());
+            }
+        });
+
+
     }
 
     @Override

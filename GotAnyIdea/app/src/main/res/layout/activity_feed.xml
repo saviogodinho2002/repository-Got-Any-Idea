@@ -39,6 +39,7 @@
                     android:id="@+id/img_profilephoto"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
+                    android:clickable="true"
                     android:src="@drawable/pf_default"
                     app:civ_border_color="@color/purple_700"
                     app:civ_border_width="2dp"

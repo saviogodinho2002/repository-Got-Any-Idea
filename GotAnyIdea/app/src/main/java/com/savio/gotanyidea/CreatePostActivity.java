@@ -70,7 +70,6 @@ public class CreatePostActivity extends AppCompatActivity {
         checkBoxesList.add(chkTecnologia);
         checkBoxesList.add(chkGambiarra);
 
-
         photoSelect = findViewById(R.id.select_photo_post);
         photoUser = findViewById(R.id.photo_createpost_user);
         photoPost = findViewById(R.id.photo_createpost);
@@ -163,11 +162,11 @@ public class CreatePostActivity extends AppCompatActivity {
         Posts post = new Posts();
 
         post.setTag(tags);
-        post.setFromName(meUserName);
+
         post.setTimestamp(timestamp);
         post.setFromID(meId);
         post.setPostText(textoPost);
-        post.setUrlPhotoUser(urlPhotoUser);
+
         post.setNumLikes(0);
 
 
