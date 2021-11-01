@@ -3,6 +3,7 @@
     package="com.savio.gotanyidea">
 
     <application
+        android:name=".IdeaAplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -10,6 +11,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GotAnyIdea">
 
+        <activity android:name=".EditProfileActivity"
+            android:label="@string/editprofilelabel">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".FeedActivity" />
+
+        </activity>
         <activity
             android:name=".ComentActivity"
             android:label="@string/comentlabel">
@@ -19,9 +27,7 @@
         </activity>
         <activity
             android:name=".ProfileActivity"
-            android:label="@string/profilelabel">
-
-        </activity>
+            android:label="@string/profilelabel"></activity>
         <activity
             android:name=".CreatePostActivity"
             android:label="@string/createlabel">
@@ -36,8 +42,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".FeedActivity" />
         </activity>
-        <activity
-            android:name=".FeedActivity">
+        <activity android:name=".FeedActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -49,7 +54,7 @@
             android:label="@string/registerlabel">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".FeedActivity" />
+                android:value=".LoginActivity" />
         </activity>
         <activity
             android:name=".LoginActivity"

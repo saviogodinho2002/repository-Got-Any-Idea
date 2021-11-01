@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.DialogInterface;
 import android.content.Intent;
 
@@ -54,7 +56,7 @@ import java.util.List;
 public class FeedActivity extends AppCompatActivity {
     private Button btnNewPost;
     private ImageView photoUser;
-    private GroupAdapter adapter;
+    public GroupAdapter adapter;
     private User me;
     private List<Posts> postContainTag;
     private List<String> tags;
@@ -68,46 +70,74 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
 
+        adapter = new GroupAdapter();
+
+        rv = findViewById(R.id.recycler_posts);
+        rv.setLayoutManager(new LinearLayoutManager(FeedActivity.this));
+        rv.addItemDecoration(new DividerItemDecoration(FeedActivity.this,LinearLayoutManager.VERTICAL));
+        rv.setAdapter(adapter);
+
+
+        IdeaAplication aplication = (IdeaAplication) getApplication();
+
+        getApplication().registerActivityLifecycleCallbacks(aplication);
+
+
+
         dropList = findViewById(R.id.spin_tags);
         btnNewPost = findViewById(R.id.btn_newpost);
         photoUser = findViewById(R.id.img_profilephoto);
 
-        itemsDropList = new String[]{"      #ALLTAGS","      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
+        itemsDropList = new String[]{"       ","      #ALLTAGS","      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
          itensDropOptions =  new String[]{"    [OPÇÕES]","      EXCLUIR","      EDITAR"};
           adapterSpinPost = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensDropOptions);
         ArrayAdapter<String> adapterDropList = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itemsDropList);
         dropList.setAdapter(adapterDropList);
+        tags = new ArrayList<>();
+        postContainTag = new ArrayList<>();
 
         dropList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position){
-                    case 0:
-                        tags.clear();
-                        tags.add("TECNOLOGIA");
-                        tags.add("CULINARIA");
-                        tags.add("GAMBIARRA");
-                        tags.add("ARTES");
-                        break;
                     case 1:
                         tags.clear();
                         tags.add("TECNOLOGIA");
+                        tags.add("CULINARIA");
+                        tags.add("GAMBIARRA");
+                        tags.add("ARTES");
+                        fethPosts();
                         break;
                     case 2:
                         tags.clear();
-                        tags.add("CULINARIA");
+                        tags.add("TECNOLOGIA");
+                        fethPosts();
                         break;
                     case 3:
                         tags.clear();
-                        tags.add("GAMBIARRA");
+                        tags.add("CULINARIA");
+                        fethPosts();
                         break;
                     case 4:
                         tags.clear();
+                        tags.add("GAMBIARRA");
+                        fethPosts();
+                        break;
+                    case 5:
+                        tags.clear();
+                        tags.add("ARTES");
+                        fethPosts();
+                        break;
+                    default:
+                        tags.clear();
+                        tags.add("TECNOLOGIA");
+                        tags.add("CULINARIA");
+                        tags.add("GAMBIARRA");
                         tags.add("ARTES");
                         break;
                 }
-                fethPosts();
 
+                    Log.e("teste","executando qoque nao deve");
             }
 
             @Override
@@ -117,16 +147,6 @@ public class FeedActivity extends AppCompatActivity {
         });
 
 
-        adapter = new GroupAdapter();
-
-        tags = new ArrayList<>();
-        postContainTag = new ArrayList<>();
-
-        rv = findViewById(R.id.recycler_posts);
-        rv.setLayoutManager(new LinearLayoutManager(FeedActivity.this));
-        rv.addItemDecoration(new DividerItemDecoration(FeedActivity.this,LinearLayoutManager.VERTICAL));
-        rv.setAdapter(adapter);
-        adapter.clear();
 
 
         btnNewPost.setOnClickListener(new View.OnClickListener() {
@@ -145,6 +165,7 @@ public class FeedActivity extends AppCompatActivity {
 
         verifyAutentication();
 
+
     }
     private void toCreatePostActivity(){
         Intent intent =  new Intent(FeedActivity.this,CreatePostActivity.class);
@@ -154,6 +175,7 @@ public class FeedActivity extends AppCompatActivity {
     private void fethPosts(){
         if(me != null){
             adapter.clear();
+            Log.e("teste","clenando adapter");
             FirebaseFirestore.getInstance().collection("/posts")
                     .orderBy("timestamp", Query.Direction.DESCENDING)
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -165,7 +187,7 @@ public class FeedActivity extends AppCompatActivity {
 
                                 Posts post = doc.getDocument().toObject(Posts.class);
                               if((doc.getType() == DocumentChange.Type.ADDED) ){
-
+                                Log.e("teste","Itens na lista de documentos: "+String.valueOf(documentChanges.size()));
                                     if( !Collections.disjoint(post.getTag(),tags) ) {
 
                                         if((documentChanges.size() <= 1 )){
@@ -201,7 +223,7 @@ public class FeedActivity extends AppCompatActivity {
                             }
                         }
                     });
-
+            Log.e("teste","Itens no adapter: " + String.valueOf(adapter.getItemCount()));
         }
 
     }
@@ -225,7 +247,9 @@ public class FeedActivity extends AppCompatActivity {
                           Picasso.get()
                                   .load(me.getUrlProfilePhoto())
                                   .into(photoUser);
+                            adapter.clear();
                           fethPosts();
+
                         }
                     });
 

@@ -7,16 +7,15 @@ public class User implements Parcelable {
     private String name;
     private String userID;
     private String urlProfilePhoto;
+    private String fileNameProfilePhoto;
 
 
-    public User() {
-
-    }
 
     protected User(Parcel in) {
         name = in.readString();
         userID = in.readString();
         urlProfilePhoto = in.readString();
+        fileNameProfilePhoto = in.readString();
 
     }
 
@@ -51,6 +50,17 @@ public class User implements Parcelable {
     public String getUrlProfilePhoto() {
         return urlProfilePhoto;
     }
+    public String getFileNameProfilePhoto() {
+        return fileNameProfilePhoto;
+    }
+
+    public void setFileNameProfilePhoto(String fileNameProfilePhoto) {
+        this.fileNameProfilePhoto = fileNameProfilePhoto;
+    }
+
+    public User() {
+
+    }
 
     public void setUrlProfilePhoto(String urlProfilePhoto) {
         this.urlProfilePhoto = urlProfilePhoto;
@@ -67,6 +77,7 @@ public class User implements Parcelable {
         dest.writeString(name);
         dest.writeString(userID);
         dest.writeString(urlProfilePhoto);
+        dest.writeString(fileNameProfilePhoto);
 
     }
 }

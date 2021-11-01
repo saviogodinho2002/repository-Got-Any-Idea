@@ -141,6 +141,7 @@ public class RegisterActivity extends AppCompatActivity {
                         user.setUserID(userMe.getUid());
                         user.setName(name);
                         user.setUrlProfilePhoto(urlProfilePhoto);
+                        user.setFileNameProfilePhoto(filename);
                         FirebaseFirestore.getInstance().collection("/users")
                                 .document(meUserID)
                                 .set(user)

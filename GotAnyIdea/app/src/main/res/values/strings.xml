@@ -29,4 +29,10 @@
     <string name="aditlabel">Editar</string>
     <string name="logout">logout</string>
     <string name="btneditprofile">✏️Editar perfil</string>
+    <string name="editprofilelabel">Editar perfil</string>
+    <string name="namesub">Nome:</string>
+    <string name="photousersub">Foto de perfil</string>
+    <string name="confirm">️Confirmar</string>
+    <string name="cancel">Cancelar</string>
+
 </resources>

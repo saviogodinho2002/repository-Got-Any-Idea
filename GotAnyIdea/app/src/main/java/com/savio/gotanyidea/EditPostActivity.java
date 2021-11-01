@@ -151,15 +151,7 @@ public class EditPostActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(postFromIntent.getUrlPhotoPost() != null && !postFromIntent.getUrlPhotoPost().isEmpty()){
-                    FirebaseStorage.getInstance().getReference("/images-post/"+postFromIntent.getPhotoPostFileName())
-                            .delete()
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    postFromIntent.setUrlPhotoPost(null);
-                                    postFromIntent.setPhotoPostFileName(null);
-                                }
-                            });
+                    postFromIntent.setUrlPhotoPost(null);
 
                 }
                 photoPost.setImageDrawable(null);
@@ -245,6 +237,7 @@ public class EditPostActivity extends AppCompatActivity {
         Log.e("teste","chegou ate aqui?");
 
                         if ((postFromIntent.getUrlPhotoPost() != null) && (!postFromIntent.getUrlPhotoPost().isEmpty())) {
+
                             post.setUrlPhotoPost(postFromIntent.getUrlPhotoPost());
                             post.setPhotoPostFileName(postFromIntent.getPhotoPostFileName());
                             FirebaseFirestore.getInstance().collection("/posts")
@@ -259,47 +252,63 @@ public class EditPostActivity extends AppCompatActivity {
 
 
                             return;
+
                         }
-
-                        Log.e("teste","DELETOU IMG ANTEIROR");
-
-                        if ((selectedPhotoDirectory != null) && (!selectedPhotoDirectory.toString().isEmpty())) {
-                            String filename = UUID.randomUUID().toString();
-                            final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
-                            Log.e("teste","UPANDO  NOVA IMG");
-                            ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        else if ((selectedPhotoDirectory != null) && (!selectedPhotoDirectory.toString().isEmpty())) {
+                            FirebaseStorage.getInstance().getReference("/images-post/"+postFromIntent.getPhotoPostFileName())
+                                    .delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
-                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                    Log.e("teste","baixar IMG");
-                                    ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                public void onSuccess(Void unused) {
+                                    String filename = UUID.randomUUID().toString();
+                                    final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
+                                    Log.e("teste","UPANDO  NOVA IMG");
+                                    ref.putFile(selectedPhotoDirectory).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                         @Override
-                                        public void onSuccess(Uri uri) {
-                                            post.setUrlPhotoPost(uri.toString());
-                                            post.setPhotoPostFileName(filename);
-                                            FirebaseFirestore.getInstance().collection("/posts")
-                                                    .document(postID)
-                                                    .set(post)
-                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                        @Override
-                                                        public void onSuccess(Void unused) {
-                                                            startActivity(intent);
-                                                            return;
-                                                        }
-                                                    });
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            Log.e("teste","baixar IMG");
+                                            ref.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+                                                    post.setUrlPhotoPost(uri.toString());
+                                                    post.setPhotoPostFileName(filename);
+                                                    FirebaseFirestore.getInstance().collection("/posts")
+                                                            .document(postID)
+                                                            .set(post)
+                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void unused) {
+                                                                    startActivity(intent);
+                                                                    return;
+                                                                }
+                                                            });
                                                 }
                                             });
                                         }
                                     });
+
+                                }
+                            });
+
+
+
                         }else{
-                            FirebaseFirestore.getInstance().collection("/posts")
-                                    .document(postID)
-                                    .set(post)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            startActivity(intent);
-                                        }
-                                    });
+                            FirebaseStorage.getInstance().getReference("/images-post/"+postFromIntent.getPhotoPostFileName())
+                                    .delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    FirebaseFirestore.getInstance().collection("/posts")
+                                            .document(postID)
+                                            .set(post)
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void unused) {
+                                                    startActivity(intent);
+                                                }
+                                            });
+                                }
+                            });
+
+
 
                         return;
                         }

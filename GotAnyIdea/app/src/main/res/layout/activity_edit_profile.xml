@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".EditProfileActivity">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/photo_user_editiprofile"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="100dp"
+        android:clickable="true"
+        app:civ_border_color="@color/purple_700"
+        app:civ_border_width="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <EditText
+        android:id="@+id/cx_username_editiprofile"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:ems="10"
+
+        android:inputType="textPersonName"
+        android:paddingLeft="10dp"
+        android:textColor="@color/white"
+        android:textColorHighlight="@color/white"
+        android:textColorHint="@color/white"
+        android:textColorLink="@color/white"
+        app:layout_constraintEnd_toEndOf="@+id/photo_user_editiprofile"
+        app:layout_constraintStart_toStartOf="@+id/photo_user_editiprofile"
+        app:layout_constraintTop_toBottomOf="@+id/photo_user_editiprofile" />
+
+    <Button
+        android:id="@+id/btn_confirm_alterations"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:text="@string/confirm"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/azul_denim"
+        app:layout_constraintBottom_toTopOf="@+id/btn_cancel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@color/white"
+        app:strokeWidth="10dp" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/bg_edittext_rounded"
+        android:text="@string/cancel"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/azul_denim"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btn_confirm_alterations"
+        app:layout_constraintStart_toStartOf="@+id/btn_confirm_alterations" />
+
+    <TextView
+        android:id="@+id/txt_subtitle_profilephoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/photousersub"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/photo_user_editiprofile"
+        app:layout_constraintEnd_toEndOf="@+id/photo_user_editiprofile"
+        app:layout_constraintStart_toStartOf="@+id/photo_user_editiprofile" />
+
+    <TextView
+        android:id="@+id/txt_subtitile_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/namesub"
+        style="bold"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/cx_username_editiprofile"
+        app:layout_constraintStart_toStartOf="@+id/cx_username_editiprofile" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

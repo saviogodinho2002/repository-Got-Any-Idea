@@ -114,6 +114,7 @@ public class ComentActivity extends AppCompatActivity {
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             me = documentSnapshot.toObject(User.class);
                             fetchPost();
+
                         }
                     });
 

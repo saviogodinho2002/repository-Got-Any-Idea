@@ -82,7 +82,18 @@ public class ProfileActivity extends AppCompatActivity {
         userID = getIntent().getExtras().getString("userID") ;
         verifyAutentication();
 
+        btnEditPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               editProfileActivity();
+            }
+        });
 
+
+    }
+    private void editProfileActivity(){
+        Intent intent = new Intent(ProfileActivity.this,EditProfileActivity.class);
+        startActivity(intent);
     }
 
     private void verifyAutentication(){
