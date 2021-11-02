@@ -1,7 +1,5 @@
 package com.savio.gotanyidea;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -17,9 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -37,20 +33,21 @@ public class EditProfileActivity extends AppCompatActivity {
     private Button btnConfirmAlterations, btnCancel;
     private EditText cxUserName;
     private ImageView photoUser;
-    Uri newProfilePhoto;
-    String newPhoto;
-    Bitmap bitmap;
+    private Uri newProfilePhoto;
+    private String newPhoto;
+    private Bitmap bitmap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
         Log.e("teste","oi casada");
 
-        btnCancel = findViewById(R.id.btn_cancel);
+        btnCancel = findViewById(R.id.btn_cancel_profile);
         btnConfirmAlterations = findViewById(R.id.btn_confirm_alterations);
         cxUserName = findViewById(R.id.cx_username_editiprofile);
 
         photoUser = findViewById(R.id.photo_user_editiprofile);
+
         photoUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,13 +55,21 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
-        verifyAutentication();
+
+
         btnConfirmAlterations.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 changeProfile();
             }
         });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity();
+            }
+        });
+        verifyAutentication();
     }
     private void fetchPerfil(){
         Picasso.get()
@@ -104,7 +109,8 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         if((me.getName().equals(newName))&&(me.getUrlProfilePhoto()!= null && !me.getUrlProfilePhoto().isEmpty() ) ){
-            Toast.makeText(EditProfileActivity.this,"Nada para alterar",Toast.LENGTH_SHORT).show();
+            Toast.makeText(EditProfileActivity.this,"Nada alterado",Toast.LENGTH_SHORT).show();
+            profileActivity();
         }
         else if((me.getUrlProfilePhoto() == null) || (me.getUrlProfilePhoto().isEmpty())){
             Log.e("teste","Mudando foto");
@@ -141,7 +147,7 @@ public class EditProfileActivity extends AppCompatActivity {
                                                         public void onSuccess(Void unused) {
                                                             Log.e("teste","PERFIL ALTERADO FODAMENTE");
                                                             Toast.makeText(EditProfileActivity.this,"Perfil alterado com sucesso",Toast.LENGTH_SHORT).show();
-
+                                                            profileActivity();
                                                         }
                                                     });
 
@@ -167,6 +173,7 @@ public class EditProfileActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(Void unused) {
                             Toast.makeText(EditProfileActivity.this,"Perfil alterado com sucesso",Toast.LENGTH_SHORT).show();
+                            profileActivity();
                         }
                     });
 
@@ -174,6 +181,11 @@ public class EditProfileActivity extends AppCompatActivity {
 
 
 
+    }
+    private void profileActivity(){
+        Intent intent = new Intent(EditProfileActivity.this,ProfileActivity.class);
+        intent.putExtra("userID",me.getUserID());
+        startActivity(intent);
     }
 
     private void verifyAutentication(){

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -176,9 +177,13 @@ public class CreatePostActivity extends AppCompatActivity {
         String postID = UUID.randomUUID().toString();
         post.setPostID(postID);
 
-        Toast.makeText(CreatePostActivity.this,"Postando, aguarde",Toast.LENGTH_LONG).show();
+        DialogLoading cdd = new DialogLoading(CreatePostActivity.this);
+        cdd.show();
         Log.e("teste","chegou ate aqui?");
         if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
+
+
+
             String filename = UUID.randomUUID().toString();
             final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
 
@@ -199,6 +204,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void unused) {
+
+                                            cdd.dismiss();
                                             startActivity(intent);
                                         }
                                     });
@@ -219,6 +226,8 @@ public class CreatePostActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
+
+                            cdd.dismiss();
                             startActivity(intent);
                         }
                     });

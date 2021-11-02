@@ -7,12 +7,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
-import android.app.Application;
-import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,14 +19,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Space;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.SuccessContinuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,7 +34,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.iid.FirebaseInstanceIdReceiver;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -65,6 +59,8 @@ public class FeedActivity extends AppCompatActivity {
     private String[] itemsDropList;
     private String[] itensDropOptions;
     ArrayAdapter<String> adapterSpinPost;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,23 +74,25 @@ public class FeedActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
 
-        IdeaAplication aplication = (IdeaAplication) getApplication();
-
-        getApplication().registerActivityLifecycleCallbacks(aplication);
-
 
 
         dropList = findViewById(R.id.spin_tags);
         btnNewPost = findViewById(R.id.btn_newpost);
         photoUser = findViewById(R.id.img_profilephoto);
 
-        itemsDropList = new String[]{"       ","      #ALLTAGS","      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
+        itemsDropList = new String[]{"       TAGS","      #ALLTAGS","      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
          itensDropOptions =  new String[]{"    [OPÇÕES]","      EXCLUIR","      EDITAR"};
           adapterSpinPost = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensDropOptions);
         ArrayAdapter<String> adapterDropList = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itemsDropList);
         dropList.setAdapter(adapterDropList);
         tags = new ArrayList<>();
         postContainTag = new ArrayList<>();
+        tags.clear();
+        tags.add("TECNOLOGIA");
+        tags.add("CULINARIA");
+        tags.add("GAMBIARRA");
+        tags.add("ARTES");
+
 
         dropList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -129,11 +127,7 @@ public class FeedActivity extends AppCompatActivity {
                         fethPosts();
                         break;
                     default:
-                        tags.clear();
-                        tags.add("TECNOLOGIA");
-                        tags.add("CULINARIA");
-                        tags.add("GAMBIARRA");
-                        tags.add("ARTES");
+
                         break;
                 }
 
@@ -167,6 +161,7 @@ public class FeedActivity extends AppCompatActivity {
 
 
     }
+
     private void toCreatePostActivity(){
         Intent intent =  new Intent(FeedActivity.this,CreatePostActivity.class);
         startActivity(intent);
@@ -175,59 +170,75 @@ public class FeedActivity extends AppCompatActivity {
     private void fethPosts(){
         if(me != null){
             adapter.clear();
+
             Log.e("teste","clenando adapter");
-            FirebaseFirestore.getInstance().collection("/posts")
+            FirebaseFirestore.getInstance().collection("posts")
                     .orderBy("timestamp", Query.Direction.DESCENDING)
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@Nullable  QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
-
                               for (DocumentChange doc: documentChanges){
-
                                 Posts post = doc.getDocument().toObject(Posts.class);
-                              if((doc.getType() == DocumentChange.Type.ADDED) ){
-                                Log.e("teste","Itens na lista de documentos: "+String.valueOf(documentChanges.size()));
-                                    if( !Collections.disjoint(post.getTag(),tags) ) {
+                              if((doc.getType() == DocumentChange.Type.ADDED) ) {
 
-                                        if((documentChanges.size() <= 1 )){
-                                            if(adapter.getItemCount() == 0) {
-                                                FirebaseFirestore.getInstance().collection("users")
-                                                        .document(post.getFromID())
-                                                        .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                                    @Override
-                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                        User userpost = documentSnapshot.toObject(User.class);
-                                                        adapter.add(new ItemPost(post,userpost));
-                                                    }
-                                                });
+                                  try {
+                                      new Thread().sleep(80);
+                                  } catch (InterruptedException e) {
+                                      e.printStackTrace();
+                                  }
 
-                                            }
+                                  FirebaseFirestore.getInstance().collection("users")
+                                          .document(post.getFromID())
+                                          .get()
+                                          .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                              @Override
+                                              public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                  task.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                      @Override
+                                                      public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                          if (!Collections.disjoint(post.getTag(), tags)) {
+                                                              if ((documentChanges.size() <= 1)) {
+                                                                  if (adapter.getItemCount() == 0) {
 
-                                            else return;
+                                                                      User userpost = documentSnapshot.toObject(User.class);
 
-                                        }else{
-                                            FirebaseFirestore.getInstance().collection("users")
-                                                    .document(post.getFromID())
-                                                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                                @Override
-                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                    User userpost = documentSnapshot.toObject(User.class);
-                                                    adapter.add(new ItemPost(post,userpost));
-                                                }
-                                            });}
+                                                                      adapter.add(new ItemPost(post, userpost));
 
-                                    }
 
-                                }
-                            }
+
+                                                                  } else return;
+
+                                                              } else {
+
+
+                                                                  User userpost = documentSnapshot.toObject(User.class);
+                                                                  Log.e("teste", String.valueOf(post.getTimestamp()));
+                                                                  adapter.add(adapter.getItemCount(), new ItemPost(post, userpost));
+
+                                                              }
+
+
+                                                          }
+                                                      }
+                                                  });
+                                              }
+
+                                          });
+
+                                  Log.e("teste", "Itens na lista de documentos: " + String.valueOf(documentChanges.size()));
+
+
+                              }
+                              }
                         }
+
                     });
+
             Log.e("teste","Itens no adapter: " + String.valueOf(adapter.getItemCount()));
         }
 
     }
-
 
     private void verifyAutentication(){
         if(FirebaseAuth.getInstance().getUid() == null){
@@ -302,11 +313,33 @@ private class ItemPost extends Item<ViewHolder> {
         ImageView photoPost = viewHolder.getRoot().findViewById(R.id.photo_post);
         TextView txtNumLikes = viewHolder.getRoot().findViewById(R.id.txt_numlikes_post);
         Button btnAddComent = viewHolder.getRoot().findViewById(R.id.btn_add_coment);
-
+        TextView txtNumComents = viewHolder.getRoot().findViewById(R.id.txt_numcoments);
          spinner =  viewHolder.getRoot().findViewById(R.id.spin_post_options);
+        ImageView iconComent = viewHolder.getRoot().findViewById(R.id.photo_iconcoment);
 
-         spinner.setAdapter(adapterSpinPost);
+        iconComent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
+                intent.putExtra("post",post);
+                startActivity(intent);
+            }
+        });
+         FirebaseFirestore.getInstance().collection("posts")
+                 .document(post.getPostID())
+                 .collection("coments")
+                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                     @Override
+                     public void onEvent(@Nullable  QuerySnapshot value, @Nullable  FirebaseFirestoreException error) {
+                        List<DocumentChange> documentChanges = value.getDocumentChanges();
+                            if( (value.getDocumentChanges().size() > 1) && txtNumComents.getText().equals("0"))
+                                txtNumComents.setText( String.valueOf(value.getDocumentChanges().size()) );
 
+
+                     }
+                 });
+
+        spinner.setAdapter(adapterSpinPost);
          txtNumLikes.setText(String.valueOf(post.getNumLikes()));
         if(!post.getUserLikedId().contains(me.getUserID()))
          likeStar.setBackgroundResource(R.drawable.lampiconoff);
@@ -423,7 +456,7 @@ private class ItemPost extends Item<ViewHolder> {
         txtNamePost.setText(userPost.getName());
 
         if((post.getUrlPhotoPost() != null) && !post.getUrlPhotoPost().isEmpty()) {
-            Log.e("teste","TEM FOTO");
+            //Log.e("teste","TEM FOTO");
             photoPost.setVisibility(View.VISIBLE);
             Picasso.get()
                     .load(post.getUrlPhotoPost())

@@ -41,7 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btnRegister;
     private Uri photoSelectedDiretory;
     private String meUserID;
-
+    private DialogLoading cdd;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +112,8 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
         btnRegister.setClickable(false);
-        Toast.makeText(RegisterActivity.this,"Criando usuário, aguarde",Toast.LENGTH_LONG).show();
+        cdd = new DialogLoading(RegisterActivity.this);
+        cdd.show();
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,password)
                 .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
@@ -148,7 +149,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
-
+                                        cdd.dismiss();
                                         Intent intent =  new Intent(RegisterActivity.this,FeedActivity.class);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                         startActivity(intent);

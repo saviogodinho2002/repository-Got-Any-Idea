@@ -152,4 +152,30 @@
         app:layout_constraintEnd_toEndOf="@+id/txt_post"
         app:layout_constraintStart_toEndOf="@+id/txt_numlikes_post"
         app:layout_constraintTop_toTopOf="@+id/photo_like_star" />
+
+    <ImageView
+        android:id="@+id/photo_iconcoment"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/txt_numcoments"
+        app:layout_constraintEnd_toStartOf="@+id/txt_numcoments"
+        app:layout_constraintTop_toTopOf="@+id/txt_numcoments"
+        app:srcCompat="@drawable/coment_icon" />
+
+    <TextView
+        android:id="@+id/txt_numcoments"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:text="0"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_add_coment"
+        app:layout_constraintEnd_toStartOf="@+id/btn_add_coment"
+        app:layout_constraintTop_toTopOf="@+id/btn_add_coment" />
 </androidx.constraintlayout.widget.ConstraintLayout>

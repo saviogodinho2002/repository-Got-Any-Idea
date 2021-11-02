@@ -143,4 +143,5 @@ public class Posts  implements Parcelable{
         dest.writeInt(numLikes);
         dest.writeStringList(userLikedId);
     }
+
 }

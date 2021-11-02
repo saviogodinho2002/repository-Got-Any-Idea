@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -148,8 +149,8 @@ public class ComentActivity extends AppCompatActivity {
 
 
     }
-    private void fetchComentarios(){
-        if(me != null){
+    private void fetchComentarios() {
+        if (me != null) {
             adapter.clear();
             FirebaseFirestore.getInstance().collection("/posts")
                     .document(post.getPostID())
@@ -157,34 +158,59 @@ public class ComentActivity extends AppCompatActivity {
                     .orderBy("timestamp", Query.Direction.ASCENDING)
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
-                        public void onEvent(@Nullable  QuerySnapshot value, FirebaseFirestoreException error) {
+                        public void onEvent(@Nullable QuerySnapshot value, FirebaseFirestoreException error) {
 
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
-                            Log.e("teste","PEGOU LISTA DE COMENTARIOS");
-                            for (DocumentChange doc: documentChanges) {
-                                if(doc.getType() == DocumentChange.Type.ADDED) {
+                            Log.e("teste", "PEGOU LISTA DE COMENTARIOS");
+                            for (DocumentChange doc : documentChanges) {
+
+                                if (doc.getType() == DocumentChange.Type.ADDED) {
                                     Coment coment = doc.getDocument().toObject(Coment.class);
-                                    FirebaseFirestore.getInstance().collection("/users")
+                                    try {
+                                        new Thread().sleep(80);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    String comentID = FirebaseFirestore.getInstance().collection("/users")
                                             .document(coment.getFromtID())
-                                            .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                        @Override
-                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            .getId();
+                                   Log.e("teste",comentID);
+                                    if (comentID != null && !comentID.isEmpty()) {
 
-                                            User userComent = documentSnapshot.toObject(User.class);
-                                            adapter.add(new ItemComent(coment,userComent));
-                                            Log.e("teste","FETCHCOMENTARIO");
-                                        }
-                                    });
+                                        FirebaseFirestore.getInstance().collection("/users")
+                                                .document(coment.getFromtID())
+                                                .get()
+                                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                        User userComent = documentSnapshot.toObject(User.class);
+                                                        if(userComent != null && userComent.getName() !=null && !userComent.getName().isEmpty())
+                                                            adapter.add(new ItemComent(coment, userComent));
+                                                        else
+                                                            FirebaseFirestore.getInstance().collection("/posts")
+                                                                    .document(post.getPostID())
+                                                                    .collection("coments")
+                                                                    .document(coment.getComentID())
+                                                                    .delete();
+                                                        Log.e("teste", "FETCHCOMENTARIO");
+                                                    }
+                                                });
 
+                                    } else {
+
+                                        FirebaseFirestore.getInstance().collection("/posts")
+                                                .document(post.getPostID())
+                                                .collection("coments")
+                                                .document(coment.getComentID())
+                                                .delete();
+                                    }
                                 }
                             }
+
                         }
                     });
-
-
         }
     }
-
     private void createComent(){
         String text = cxTextComent.getText().toString();
         if( (text == null) || (text.isEmpty())  ){

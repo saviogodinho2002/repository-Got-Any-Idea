@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -88,7 +89,19 @@ public class ProfileActivity extends AppCompatActivity {
                editProfileActivity();
             }
         });
-
+        btnDelPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogDelAccount cdd=new DialogDelAccount(ProfileActivity.this);
+                cdd.show();
+                cdd.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        verifyAutentication();
+                    }
+                });
+            }
+        });
 
     }
     private void editProfileActivity(){
@@ -230,9 +243,28 @@ public class ProfileActivity extends AppCompatActivity {
             ImageView photoPost = viewHolder.getRoot().findViewById(R.id.photo_post);
             TextView txtNumLikes = viewHolder.getRoot().findViewById(R.id.txt_numlikes_post);
             Button btnAddComent = viewHolder.getRoot().findViewById(R.id.btn_add_coment);
-
+            TextView txtNumComents = viewHolder.getRoot().findViewById(R.id.txt_numcoments);
             spinner =  viewHolder.getRoot().findViewById(R.id.spin_post_options);
+            ImageView iconComent = viewHolder.getRoot().findViewById(R.id.photo_iconcoment);
 
+            iconComent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ProfileActivity.this,ComentActivity.class);
+                    intent.putExtra("post",post);
+                    startActivity(intent);
+                }
+            });
+            FirebaseFirestore.getInstance().collection("posts")
+                    .document(post.getPostID())
+                    .collection("coments")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable  QuerySnapshot value, @Nullable  FirebaseFirestoreException error) {
+                            if( (value.getDocumentChanges().size() > 1) && txtNumComents.getText().equals("0"))
+                                txtNumComents.setText( String.valueOf(value.getDocumentChanges().size()) );
+                        }
+                    });
             spinner.setAdapter(adapterSpinPost);
 
             txtNumLikes.setText(String.valueOf(post.getNumLikes()));
@@ -360,10 +392,6 @@ public class ProfileActivity extends AppCompatActivity {
             }else {
                 photoPost.setVisibility(View.GONE);
             }
-
-
-
-
 
 
         }

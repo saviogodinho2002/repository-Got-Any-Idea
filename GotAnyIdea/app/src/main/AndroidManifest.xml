@@ -27,7 +27,9 @@
         </activity>
         <activity
             android:name=".ProfileActivity"
-            android:label="@string/profilelabel"></activity>
+            android:label="@string/profilelabel">
+
+        </activity>
         <activity
             android:name=".CreatePostActivity"
             android:label="@string/createlabel">

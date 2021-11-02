@@ -36,7 +36,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 logIn();
-
             }
         });
         txtRegister.setOnClickListener(new View.OnClickListener() {
