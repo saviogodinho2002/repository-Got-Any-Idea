@@ -58,7 +58,7 @@ public class FeedActivity extends AppCompatActivity {
     private Spinner dropList;
     private String[] itemsDropList;
     private String[] itensDropOptions;
-    ArrayAdapter<String> adapterSpinPost;
+    private ArrayAdapter<String> adapterSpinPost;
 
 
     @Override
@@ -183,7 +183,7 @@ public class FeedActivity extends AppCompatActivity {
                               if((doc.getType() == DocumentChange.Type.ADDED) ) {
 
                                   try {
-                                      new Thread().sleep(80);
+                                      new Thread().sleep(100);
                                   } catch (InterruptedException e) {
                                       e.printStackTrace();
                                   }
@@ -293,201 +293,215 @@ public class FeedActivity extends AppCompatActivity {
 
 
 
-private class ItemPost extends Item<ViewHolder> {
+    private class ItemPost extends Item<ViewHolder> {
         Posts post;
         User userPost;
 
-    public ItemPost(Posts post,User userPost) {
-        this.post = post;
-        this.userPost = userPost;
-    }
-    private Spinner spinner;
-    @Override
-    public void bind(@NonNull  ViewHolder viewHolder, int position) {
+        public ItemPost(Posts post,User userPost) {
+            this.post = post;
+            this.userPost = userPost;
+        }
+        private Spinner spinner;
+        @Override
+        public void bind(@NonNull  ViewHolder viewHolder, int position) {
 
-        ImageView likeStar = viewHolder.getRoot().findViewById(R.id.photo_like_star);
-        ImageView photoUserPost = viewHolder.getRoot().findViewById(R.id.photo_user_post);
-        TextView txtPost = viewHolder.getRoot().findViewById(R.id.txt_post);
-        TextView txtNamePost = viewHolder.getRoot().findViewById(R.id.txt_fromname_post);
-        TextView txtTagPost = viewHolder.getRoot().findViewById(R.id.txt_tag_post);
-        ImageView photoPost = viewHolder.getRoot().findViewById(R.id.photo_post);
-        TextView txtNumLikes = viewHolder.getRoot().findViewById(R.id.txt_numlikes_post);
-        Button btnAddComent = viewHolder.getRoot().findViewById(R.id.btn_add_coment);
-        TextView txtNumComents = viewHolder.getRoot().findViewById(R.id.txt_numcoments);
-         spinner =  viewHolder.getRoot().findViewById(R.id.spin_post_options);
-        ImageView iconComent = viewHolder.getRoot().findViewById(R.id.photo_iconcoment);
+            ImageView likeStar = viewHolder.getRoot().findViewById(R.id.photo_like_star);
+            ImageView photoUserPost = viewHolder.getRoot().findViewById(R.id.photo_user_post);
+            TextView txtPost = viewHolder.getRoot().findViewById(R.id.txt_post);
+            TextView txtNamePost = viewHolder.getRoot().findViewById(R.id.txt_fromname_post);
+            TextView txtTagPost = viewHolder.getRoot().findViewById(R.id.txt_tag_post);
+            ImageView photoPost = viewHolder.getRoot().findViewById(R.id.photo_post);
+            TextView txtNumLikes = viewHolder.getRoot().findViewById(R.id.txt_numlikes_post);
+            Button btnAddComent = viewHolder.getRoot().findViewById(R.id.btn_add_coment);
+            TextView txtNumComents = viewHolder.getRoot().findViewById(R.id.txt_numcoments);
+            spinner =  viewHolder.getRoot().findViewById(R.id.spin_post_options);
+            ImageView iconComent = viewHolder.getRoot().findViewById(R.id.photo_iconcoment);
 
-        iconComent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
-                intent.putExtra("post",post);
-                startActivity(intent);
-            }
-        });
-         FirebaseFirestore.getInstance().collection("posts")
-                 .document(post.getPostID())
-                 .collection("coments")
-                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                     @Override
-                     public void onEvent(@Nullable  QuerySnapshot value, @Nullable  FirebaseFirestoreException error) {
-                        List<DocumentChange> documentChanges = value.getDocumentChanges();
-                            if( (value.getDocumentChanges().size() > 1) && txtNumComents.getText().equals("0"))
-                                txtNumComents.setText( String.valueOf(value.getDocumentChanges().size()) );
-
-
-                     }
-                 });
-
-        spinner.setAdapter(adapterSpinPost);
-         txtNumLikes.setText(String.valueOf(post.getNumLikes()));
-        if(!post.getUserLikedId().contains(me.getUserID()))
-         likeStar.setBackgroundResource(R.drawable.lampiconoff);
-        else
-            likeStar.setBackgroundResource(R.drawable.lampiconon);
-
-        likeStar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean liked;
-                if(!post.getUserLikedId().contains(me.getUserID())){
-                    post.getUserLikedId().add(me.getUserID());
-                    post.setNumLikes(post.getNumLikes()+1);
-                    liked = true;
+            iconComent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
+                    intent.putExtra("post",post);
+                    startActivity(intent);
                 }
-                else{
-                    liked =false;
-                    post.getUserLikedId().remove(me.getUserID());
-                    post.setNumLikes(post.getNumLikes()-1);
-            }
+            });
+            txtNumComents.setText( "0");
+            FirebaseFirestore.getInstance().collection("posts")
+                    .document(post.getPostID())
+                    .collection("coments")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable  QuerySnapshot value, @Nullable  FirebaseFirestoreException error) {
+                            List<DocumentChange> documentChanges = value.getDocumentChanges();
+                            int num = 0;
+                            for (DocumentChange doc:
+                                 documentChanges) {
+                                if(doc.getType() == DocumentChange.Type.ADDED)
+                                    num++;
+                                else if(doc.getType() == DocumentChange.Type.REMOVED)
+                                    num--;
+                            }
+                            if( (value.getDocumentChanges().size() > 1) && txtNumComents.getText().equals("0"))
+                                txtNumComents.setText( String.valueOf(num ) );
+                            else {
+                                num = Integer.valueOf(txtNumComents.getText().toString()) + num;
+                                txtNumComents.setText( String.valueOf(num ) );
+                            }
+
+                        }
+                    });
+ 
+            spinner.setAdapter(adapterSpinPost);
+            txtNumLikes.setText(String.valueOf(post.getNumLikes()));
+            if(!post.getUserLikedId().contains(me.getUserID()))
+                likeStar.setBackgroundResource(R.drawable.lampiconoff);
+            else
+                likeStar.setBackgroundResource(R.drawable.lampiconon);
+
+            likeStar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean liked;
+                    if(!post.getUserLikedId().contains(me.getUserID())){
+                        post.getUserLikedId().add(me.getUserID());
+                        post.setNumLikes(post.getNumLikes()+1);
+                        liked = true;
+                    }
+                    else{
+                        liked =false;
+                        post.getUserLikedId().remove(me.getUserID());
+                        post.setNumLikes(post.getNumLikes()-1);
+                    }
                     FirebaseFirestore.getInstance().collection("/posts")
                             .document(post.getPostID())
                             .update("userLikedId",post.getUserLikedId())
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-                                 Log.e("teste","LIKE SETADO");
-                                 FirebaseFirestore.getInstance().collection("/posts")
-                                         .document(post.getPostID())
+                                    Log.e("teste","LIKE SETADO");
+                                    FirebaseFirestore.getInstance().collection("/posts")
+                                            .document(post.getPostID())
                                             .update("numLikes",post.getNumLikes())
-                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                     @Override
-                                     public void onSuccess(Void unused) {
-                                         Log.e("teste","LIKE implementation");
-                                         if(liked) {
-                                             likeStar.setBackgroundResource(R.drawable.lampiconon);
-                                             txtNumLikes.setText(String.valueOf(post.getNumLikes()));
-                                         }else {
-                                             likeStar.setBackgroundResource(R.drawable.lampiconoff);
-                                             txtNumLikes.setText(String.valueOf(post.getNumLikes()));
-                                         }
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void unused) {
+                                                    Log.e("teste","LIKE implementation");
+                                                    if(liked) {
+                                                        likeStar.setBackgroundResource(R.drawable.lampiconon);
+                                                        txtNumLikes.setText(String.valueOf(post.getNumLikes()));
+                                                    }else {
+                                                        likeStar.setBackgroundResource(R.drawable.lampiconoff);
+                                                        txtNumLikes.setText(String.valueOf(post.getNumLikes()));
+                                                    }
 
-                                     }
-                                 });
+                                                }
+                                            });
 
                                 }
                             });
-            }
-        });
+                }
+            });
 
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position){
-                    case 1:
-                        FirebaseFirestore.getInstance().collection("/posts")
-                                .document(post.getPostID())
-                                .delete()
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        adapter.removeGroup(adapter.getAdapterPosition(ItemPost.this));
-                                        Log.e("teste","excluiu porra");
-                                        final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+post.getPhotoPostFileName());
-                                        ref.delete();
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    switch (position){
+                        case 1:
+                            FirebaseFirestore.getInstance().collection("/posts")
+                                    .document(post.getPostID())
+                                    .delete()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            adapter.removeGroup(adapter.getAdapterPosition(ItemPost.this));
+                                            Log.e("teste","excluiu porra");
+                                            final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+post.getPhotoPostFileName());
+                                            ref.delete();
 
-                                    }
-                                });
-                        spinner.setSelection(0);
-                        break;
-                    case 2:
+                                        }
+                                    });
+                            spinner.setSelection(0);
+                            break;
+                        case 2:
 
-                        Intent intent = new Intent(FeedActivity.this,EditPostActivity.class);
-                        Log.e("teste","PASSAR PARA O INTENT");
-                        intent.putExtra("postID",post.getPostID());
-                        Log.e("teste","PASSOU PARA O INTENT");
-                        spinner.setSelection(0);
-                        startActivity(intent);
-                        break;
+                            Intent intent = new Intent(FeedActivity.this,EditPostActivity.class);
+                            Log.e("teste","PASSAR PARA O INTENT");
+                            intent.putExtra("postID",post.getPostID());
+                            Log.e("teste","PASSOU PARA O INTENT");
+                            spinner.setSelection(0);
+                            startActivity(intent);
+                            break;
+                    }
+
                 }
 
-            }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        btnAddComent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.e("teste","clicou");
-                Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
-                intent.putExtra("post",post);
-                startActivity(intent);
-            }
-        });
+                }
+            });
+            btnAddComent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.e("teste","clicou");
+                    Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
+                    intent.putExtra("post",post);
+                    startActivity(intent);
+                }
+            });
 
 
-        if( !post.getFromID().equals(me.getUserID()) )  spinner.setVisibility(View.GONE);
-        else spinner.setVisibility(View.VISIBLE);
-        Picasso.get()
-                .load(userPost.getUrlProfilePhoto())
-                .into(photoUserPost);
-
-        txtTagPost.setText("");
-        for(String tag :post.getTag()){
-            txtTagPost.setText( txtTagPost.getText()+" " + "#"+tag);
-        }
-
-        txtPost.setText(post.getPostText());
-
-        txtNamePost.setText(userPost.getName());
-
-        if((post.getUrlPhotoPost() != null) && !post.getUrlPhotoPost().isEmpty()) {
-            //Log.e("teste","TEM FOTO");
-            photoPost.setVisibility(View.VISIBLE);
+            if( !post.getFromID().equals(me.getUserID()) )  spinner.setVisibility(View.GONE);
+            else spinner.setVisibility(View.VISIBLE);
             Picasso.get()
-                    .load(post.getUrlPhotoPost())
-                    .into(photoPost);
+                    .load(userPost.getUrlProfilePhoto())
+                    .into(photoUserPost);
 
-        }else {
-           photoPost.setVisibility(View.GONE);
+            txtTagPost.setText("");
+            for(String tag :post.getTag()){
+                txtTagPost.setText( txtTagPost.getText()+" " + "#"+tag);
+            }
+
+            txtPost.setText(post.getPostText());
+
+            txtNamePost.setText(userPost.getName());
+
+            if((post.getUrlPhotoPost() != null) && !post.getUrlPhotoPost().isEmpty()) {
+                //Log.e("teste","TEM FOTO");
+                photoPost.setVisibility(View.VISIBLE);
+                Picasso.get()
+                        .load(post.getUrlPhotoPost())
+                        .into(photoPost);
+
+            }else {
+                photoPost.setVisibility(View.GONE);
+            }
+
+            photoUserPost.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    profileActivity(post.getFromID());
+                }
+            });
+
+            txtNamePost.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    profileActivity(post.getFromID());
+                }
+            });
+
+
         }
 
-        photoUserPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                profileActivity(post.getFromID());
-            }
-        });
-
-        txtNamePost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                profileActivity(post.getFromID());
-            }
-        });
-
-
+        @Override
+        public int getLayout() {
+            return R.layout.item_post;
+        }
     }
 
-    @Override
-    public int getLayout() {
-        return R.layout.item_post;
-    }
-}
+
 
 
 

@@ -54,7 +54,7 @@ public class ComentActivity extends AppCompatActivity {
     private User me;
     private GroupAdapter adapter;
     private RecyclerView rv;
-    ArrayAdapter<String> adapterSpinComent;
+    private ArrayAdapter<String> adapterSpinComent;
     private String[] itensSpinnerComent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

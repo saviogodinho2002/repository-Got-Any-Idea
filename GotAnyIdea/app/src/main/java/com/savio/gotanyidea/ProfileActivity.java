@@ -255,14 +255,28 @@ public class ProfileActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
+            txtNumComents.setText( "0");
             FirebaseFirestore.getInstance().collection("posts")
                     .document(post.getPostID())
                     .collection("coments")
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@Nullable  QuerySnapshot value, @Nullable  FirebaseFirestoreException error) {
+                            List<DocumentChange> documentChanges = value.getDocumentChanges();
+                            int num = 0;
+                            for (DocumentChange doc:
+                                    documentChanges) {
+                                if(doc.getType() == DocumentChange.Type.ADDED)
+                                    num++;
+                                else if(doc.getType() == DocumentChange.Type.REMOVED)
+                                    num--;
+                            }
                             if( (value.getDocumentChanges().size() > 1) && txtNumComents.getText().equals("0"))
-                                txtNumComents.setText( String.valueOf(value.getDocumentChanges().size()) );
+                                txtNumComents.setText( String.valueOf(num ) );
+                            else {
+                                num = Integer.valueOf(txtNumComents.getText().toString()) + num;
+                                txtNumComents.setText( String.valueOf(num ) );
+                            }
                         }
                     });
             spinner.setAdapter(adapterSpinPost);
