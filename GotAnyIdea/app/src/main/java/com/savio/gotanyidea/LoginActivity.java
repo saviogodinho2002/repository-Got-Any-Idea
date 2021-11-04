@@ -31,11 +31,11 @@ public class LoginActivity extends AppCompatActivity {
         cxPassWord = findViewById(R.id.cx_password);
         txtRegister = findViewById(R.id.txt_register);
 
+        btnLogin.setClickable(true);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 logIn();
-
             }
         });
         txtRegister.setOnClickListener(new View.OnClickListener() {
@@ -53,6 +53,8 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(LoginActivity.this,"Email e senha devem ser inseridos",Toast.LENGTH_SHORT).show();
             return;
         }
+        btnLogin.setClickable(false);
+        Toast.makeText(LoginActivity.this,"Logando, aguarde",Toast.LENGTH_LONG);
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {

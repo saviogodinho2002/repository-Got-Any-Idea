@@ -24,4 +24,19 @@
     <string name="registerlabel">Registre - se</string>
     <string name="loginlabel">Login</string>
     <string name="comentlabel">Comentários</string>
+    <string name="profilelabel">Perfil</string>
+    <string name="delaccout">🗑️ Deletar conta</string>
+    <string name="aditlabel">Editar</string>
+    <string name="logout">logout</string>
+    <string name="btneditprofile">✏️Editar perfil</string>
+    <string name="editprofilelabel">Editar perfil</string>
+    <string name="namesub">Nome:</string>
+    <string name="photousersub">Foto de perfil</string>
+    <string name="confirm">️Confirmar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="loadtitle">aguarde...</string>
+    <string name="qdelaccout">Tem certeza que deseja deletar sua conta?</string>
+    <string name="yes">Sim</string>
+    <string name="not">Não</string>
+
 </resources>

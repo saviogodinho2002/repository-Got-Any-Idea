@@ -3,50 +3,64 @@
     package="com.savio.gotanyidea">
 
     <application
+        android:name=".IdeaAplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GotAnyIdea">
-        <activity android:name=".ComentActivity"
-            android:label="@string/comentlabel"
-            > <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value=".FeedActivity" /></activity>
-        <activity android:name=".CreatePostActivity"
+
+        <activity android:name=".EditProfileActivity"
+            android:label="@string/editprofilelabel">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".FeedActivity" />
+
+        </activity>
+        <activity
+            android:name=".ComentActivity"
+            android:label="@string/comentlabel">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".FeedActivity" />
+        </activity>
+        <activity
+            android:name=".ProfileActivity"
+            android:label="@string/profilelabel">
+
+        </activity>
+        <activity
+            android:name=".CreatePostActivity"
             android:label="@string/createlabel">
             <meta-data
-
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".FeedActivity" />
         </activity>
-        <activity android:name=".EditPostActivity"
-            android:label="@string/editlabel"
-            >
+        <activity
+            android:name=".EditPostActivity"
+            android:label="@string/editlabel">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".FeedActivity" />
         </activity>
-        <activity android:name=".FeedActivity"
-
-            >
+        <activity android:name=".FeedActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterActivity"
-            android:label="@string/registerlabel"
-            >
+        <activity
+            android:name=".RegisterActivity"
+            android:label="@string/registerlabel">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".FeedActivity" />
+                android:value=".LoginActivity" />
         </activity>
-        <activity android:name=".LoginActivity"
-            android:label="@string/loginlabel"
-            >
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/loginlabel">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".FeedActivity" />

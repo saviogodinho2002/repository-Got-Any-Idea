@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,7 +54,7 @@ public class ComentActivity extends AppCompatActivity {
     private User me;
     private GroupAdapter adapter;
     private RecyclerView rv;
-    ArrayAdapter<String> adapterSpinComent;
+    private ArrayAdapter<String> adapterSpinComent;
     private String[] itensSpinnerComent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,7 @@ public class ComentActivity extends AppCompatActivity {
         photoPost = findViewById(R.id.img_photoPost_coment);
         rv = findViewById(R.id.recycler_coments);
         post =(Posts) getIntent().getParcelableExtra("post");
-        Log.e("teste",post.getFromName());
+
         verifyAutentication();
         adapter = new GroupAdapter();
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -84,6 +85,19 @@ public class ComentActivity extends AppCompatActivity {
         });
         itensSpinnerComent = new String[]{"     [OPÇÕES]","      EXCLUIR"};
         adapterSpinComent = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensSpinnerComent);
+
+        photoUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity(post.getFromID());
+            }
+        });
+        txtUserName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileActivity(post.getFromID());
+            }
+        });
     }
     private void verifyAutentication(){
         if(FirebaseAuth.getInstance().getUid() == null){
@@ -101,6 +115,7 @@ public class ComentActivity extends AppCompatActivity {
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             me = documentSnapshot.toObject(User.class);
                             fetchPost();
+
                         }
                     });
 
@@ -108,22 +123,34 @@ public class ComentActivity extends AppCompatActivity {
     }
     private void fetchPost(){
         Log.e("teste","fetcubcinebts");
-        txtUserName.setText(post.getFromName());
-        txtPostText.setText(post.getPostText());
-        Picasso.get()
-                .load(post.getUrlPhotoUser())
-                .into(photoUser);
-        if((post.getUrlPhotoPost() == null) || (post.getUrlPhotoPost().isEmpty())) {
-            photoPost.setVisibility(View.GONE);
-        }else{
-        Picasso.get()
-                .load(post.getUrlPhotoPost())
-                .into(photoPost);
-        }
-       fetchComentarios();
+        FirebaseFirestore.getInstance().collection("users")
+                .document(post.getFromID())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        User userPost = documentSnapshot.toObject(User.class);
+                        txtUserName.setText(userPost.getName());
+                        txtPostText.setText(post.getPostText());
+                        Picasso.get()
+                                .load(userPost.getUrlProfilePhoto())
+                                .into(photoUser);
+                        if((post.getUrlPhotoPost() == null) || (post.getUrlPhotoPost().isEmpty())) {
+                            photoPost.setVisibility(View.GONE);
+                        }else{
+                            Picasso.get()
+                                    .load(post.getUrlPhotoPost())
+                                    .into(photoPost);
+
+                        }
+                        fetchComentarios();
+                    }
+                });
+
+
     }
-    private void fetchComentarios(){
-        if(me != null){
+    private void fetchComentarios() {
+        if (me != null) {
             adapter.clear();
             FirebaseFirestore.getInstance().collection("/posts")
                     .document(post.getPostID())
@@ -131,24 +158,59 @@ public class ComentActivity extends AppCompatActivity {
                     .orderBy("timestamp", Query.Direction.ASCENDING)
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
-                        public void onEvent(@Nullable  QuerySnapshot value, FirebaseFirestoreException error) {
+                        public void onEvent(@Nullable QuerySnapshot value, FirebaseFirestoreException error) {
 
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
+                            Log.e("teste", "PEGOU LISTA DE COMENTARIOS");
+                            for (DocumentChange doc : documentChanges) {
 
-                            for (DocumentChange doc:
-                                 documentChanges) {
-                                if(doc.getType() == DocumentChange.Type.ADDED) {
+                                if (doc.getType() == DocumentChange.Type.ADDED) {
                                     Coment coment = doc.getDocument().toObject(Coment.class);
-                                    adapter.add(new ItemComent(coment));
+                                    try {
+                                        new Thread().sleep(80);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    String comentID = FirebaseFirestore.getInstance().collection("/users")
+                                            .document(coment.getFromtID())
+                                            .getId();
+                                   Log.e("teste",comentID);
+                                    if (comentID != null && !comentID.isEmpty()) {
+
+                                        FirebaseFirestore.getInstance().collection("/users")
+                                                .document(coment.getFromtID())
+                                                .get()
+                                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                        User userComent = documentSnapshot.toObject(User.class);
+                                                        if(userComent != null && userComent.getName() !=null && !userComent.getName().isEmpty())
+                                                            adapter.add(new ItemComent(coment, userComent));
+                                                        else
+                                                            FirebaseFirestore.getInstance().collection("/posts")
+                                                                    .document(post.getPostID())
+                                                                    .collection("coments")
+                                                                    .document(coment.getComentID())
+                                                                    .delete();
+                                                        Log.e("teste", "FETCHCOMENTARIO");
+                                                    }
+                                                });
+
+                                    } else {
+
+                                        FirebaseFirestore.getInstance().collection("/posts")
+                                                .document(post.getPostID())
+                                                .collection("coments")
+                                                .document(coment.getComentID())
+                                                .delete();
+                                    }
                                 }
                             }
+
                         }
                     });
-
-
         }
     }
-
     private void createComent(){
         String text = cxTextComent.getText().toString();
         if( (text == null) || (text.isEmpty())  ){
@@ -158,43 +220,41 @@ public class ComentActivity extends AppCompatActivity {
         cxTextComent.setText(null);
         long timestamp = System.currentTimeMillis();
         Coment coment =  new Coment();
-        coment.setUserNameComent(me.getName());
-        coment.setUrlProfilePhotoComent(me.getUrlProfilePhoto());
         coment.setComentText(text);
         coment.setTimestamp(timestamp);
-        coment.setUserComentID(me.getUserID());
+        coment.setFromtID(me.getUserID());
+        String comentID = UUID.randomUUID().toString();
+        coment.setComentID(comentID);
 
         FirebaseFirestore.getInstance().collection("/posts")
                 .document(post.getPostID())
                 .collection("coments")
-                .add(coment)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        FirebaseFirestore.getInstance().collection("/posts")
-                                .document(post.getPostID())
-                                .collection("coments")
-                                .document(documentReference.getId())
-                                .update("comentID",documentReference.getId())
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        fetchComentarios();
-                                    }
-                                });
+                .document(comentID)
+                .set(coment).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
 
-                    }
-                });
+
+            }
+        });
 
 
 
     }
+    private void profileActivity(String userID){
+        Intent intent = new Intent(ComentActivity.this,ProfileActivity.class);
+        intent.putExtra("userID",userID);
+        startActivity(intent);
+    }
 
     private class ItemComent extends Item<ViewHolder> {
         Coment coment;
+        User userComent;
 
-        public ItemComent(Coment coment) {
+        public ItemComent(Coment coment,User userComent)
+        {
             this.coment = coment;
+            this.userComent = userComent;
         }
 
         @Override
@@ -204,7 +264,7 @@ public class ComentActivity extends AppCompatActivity {
             ImageView photoUserComent = viewHolder.getRoot().findViewById(R.id.img_photoUser_coment);
             Spinner spinner = viewHolder.getRoot().findViewById(R.id.spinner_coment);
 
-            if( (post.getFromID().equals(me.getUserID()) ) || (coment.getUserComentID().equals(me.getUserID()))) spinner.setVisibility(View.VISIBLE);
+            if( (post.getFromID().equals(me.getUserID()) ) || (coment.getFromtID().equals(me.getUserID()))) spinner.setVisibility(View.VISIBLE);
             else spinner.setVisibility(View.GONE);
 
             spinner.setAdapter(adapterSpinComent);
@@ -221,7 +281,7 @@ public class ComentActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void unused) {
-                                            fetchComentarios();
+                                            adapter.removeGroup(adapter.getAdapterPosition(ComentActivity.ItemComent.this));
                                         }
                                     });
                             break;
@@ -236,10 +296,22 @@ public class ComentActivity extends AppCompatActivity {
             });
 
             txtComentText.setText(coment.getComentText());
-            txtName.setText(coment.getUserNameComent());
+            txtName.setText(userComent.getName());
             Picasso.get()
-                    .load(coment.getUrlProfilePhotoComent())
+                    .load(userComent.getUrlProfilePhoto())
                     .into(photoUserComent);
+            txtName.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    profileActivity(coment.getFromtID());
+                }
+            });
+            photoUserComent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    profileActivity(coment.getFromtID());
+                }
+            });
 
         }
 

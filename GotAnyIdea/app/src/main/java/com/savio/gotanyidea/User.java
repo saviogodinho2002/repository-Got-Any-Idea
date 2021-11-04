@@ -7,17 +7,16 @@ public class User implements Parcelable {
     private String name;
     private String userID;
     private String urlProfilePhoto;
-    private String token;
+    private String fileNameProfilePhoto;
 
-    public User() {
 
-    }
 
     protected User(Parcel in) {
         name = in.readString();
         userID = in.readString();
         urlProfilePhoto = in.readString();
-        token = in.readString();
+        fileNameProfilePhoto = in.readString();
+
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -51,18 +50,22 @@ public class User implements Parcelable {
     public String getUrlProfilePhoto() {
         return urlProfilePhoto;
     }
+    public String getFileNameProfilePhoto() {
+        return fileNameProfilePhoto;
+    }
+
+    public void setFileNameProfilePhoto(String fileNameProfilePhoto) {
+        this.fileNameProfilePhoto = fileNameProfilePhoto;
+    }
+
+    public User() {
+
+    }
 
     public void setUrlProfilePhoto(String urlProfilePhoto) {
         this.urlProfilePhoto = urlProfilePhoto;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 
     @Override
     public int describeContents() {
@@ -74,6 +77,7 @@ public class User implements Parcelable {
         dest.writeString(name);
         dest.writeString(userID);
         dest.writeString(urlProfilePhoto);
-        dest.writeString(token);
+        dest.writeString(fileNameProfilePhoto);
+
     }
 }

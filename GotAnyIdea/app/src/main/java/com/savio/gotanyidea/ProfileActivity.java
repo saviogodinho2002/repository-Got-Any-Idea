@@ -1,4 +1,4 @@
-package com.savio.gotanyidea;
+ package com.savio.gotanyidea;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -7,17 +7,18 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
-
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -39,210 +40,78 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 import com.xwray.groupie.GroupAdapter;
 import com.xwray.groupie.Item;
-
 import com.xwray.groupie.ViewHolder;
-
-import java.util.ArrayList;
 
 import java.util.Collections;
 import java.util.List;
 
-public class FeedActivity extends AppCompatActivity {
-    private Button btnNewPost;
-    private ImageView photoUser;
-    public GroupAdapter adapter;
+public class ProfileActivity extends AppCompatActivity {
+    private String userID;
+    private TextView txtUserName;
+    private ImageView photoUserProfile;
     private User me;
-    private List<Posts> postContainTag;
-    private List<String> tags;
+    private User userProfile;
+    private GroupAdapter adapter;
     private RecyclerView rv;
-    private Spinner dropList;
-    private String[] itemsDropList;
     private String[] itensDropOptions;
+    private Button btnEditPerfil;
+    private Button btnDelPerfil;
+
     private ArrayAdapter<String> adapterSpinPost;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feed);
-
+        setContentView(R.layout.activity_profile);
         adapter = new GroupAdapter();
 
-        rv = findViewById(R.id.recycler_posts);
-        rv.setLayoutManager(new LinearLayoutManager(FeedActivity.this));
-        rv.addItemDecoration(new DividerItemDecoration(FeedActivity.this,LinearLayoutManager.VERTICAL));
+        rv = findViewById(R.id.recycler_profile);
+        itensDropOptions =  new String[]{"    [OPÇÕES]","      EXCLUIR","      EDITAR"};
+        rv.setLayoutManager(new LinearLayoutManager(ProfileActivity.this));
+        rv.addItemDecoration(new DividerItemDecoration(ProfileActivity.this,LinearLayoutManager.VERTICAL));
         rv.setAdapter(adapter);
+        adapter.clear();
 
+        adapterSpinPost = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensDropOptions);
 
+        txtUserName = findViewById(R.id.txt_username_profile);
+        photoUserProfile = findViewById(R.id.photo_user_profile);
+        btnDelPerfil = findViewById(R.id.btn_delaccount_profile);
+        btnEditPerfil = findViewById(R.id.btn_edit_perfil);
+        btnEditPerfil.setVisibility(View.GONE);
+        btnDelPerfil.setVisibility(View.GONE);
 
-
-        dropList = findViewById(R.id.spin_tags);
-        btnNewPost = findViewById(R.id.btn_newpost);
-        photoUser = findViewById(R.id.img_profilephoto);
-
-        itemsDropList = new String[]{"       TAGS","      #ALLTAGS","      #TECNOLOGIA","      #CULINARIA","      #GAMBIARRA","      #ARTES"};
-         itensDropOptions =  new String[]{"    [OPÇÕES]","      EXCLUIR","      EDITAR"};
-          adapterSpinPost = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itensDropOptions);
-        ArrayAdapter<String> adapterDropList = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,itemsDropList);
-        dropList.setAdapter(adapterDropList);
-        tags = new ArrayList<>();
-        postContainTag = new ArrayList<>();
-        tags.clear();
-        tags.add("TECNOLOGIA");
-        tags.add("CULINARIA");
-        tags.add("GAMBIARRA");
-        tags.add("ARTES");
-
-
-        dropList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position){
-                    case 1:
-                        tags.clear();
-                        tags.add("TECNOLOGIA");
-                        tags.add("CULINARIA");
-                        tags.add("GAMBIARRA");
-                        tags.add("ARTES");
-                        fethPosts();
-                        break;
-                    case 2:
-                        tags.clear();
-                        tags.add("TECNOLOGIA");
-                        fethPosts();
-                        break;
-                    case 3:
-                        tags.clear();
-                        tags.add("CULINARIA");
-                        fethPosts();
-                        break;
-                    case 4:
-                        tags.clear();
-                        tags.add("GAMBIARRA");
-                        fethPosts();
-                        break;
-                    case 5:
-                        tags.clear();
-                        tags.add("ARTES");
-                        fethPosts();
-                        break;
-                    default:
-
-                        break;
-                }
-
-                    Log.e("teste","executando qoque nao deve");
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-
-
-
-        btnNewPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toCreatePostActivity();
-            }
-        });
-        photoUser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                profileActivity(me.getUserID());
-            }
-        });
-
-
+        userID = getIntent().getExtras().getString("userID") ;
         verifyAutentication();
 
+        btnEditPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               editProfileActivity();
+            }
+        });
+        btnDelPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogDelAccount cdd=new DialogDelAccount(ProfileActivity.this);
+                cdd.show();
+                cdd.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        verifyAutentication();
+                    }
+                });
+            }
+        });
 
     }
-
-    private void toCreatePostActivity(){
-        Intent intent =  new Intent(FeedActivity.this,CreatePostActivity.class);
+    private void editProfileActivity(){
+        Intent intent = new Intent(ProfileActivity.this,EditProfileActivity.class);
         startActivity(intent);
-    }
-
-    private void fethPosts(){
-        if(me != null){
-            adapter.clear();
-
-            Log.e("teste","clenando adapter");
-            FirebaseFirestore.getInstance().collection("posts")
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
-                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                        @Override
-                        public void onEvent(@Nullable  QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                            List<DocumentChange> documentChanges = value.getDocumentChanges();
-                              for (DocumentChange doc: documentChanges){
-                                Posts post = doc.getDocument().toObject(Posts.class);
-                              if((doc.getType() == DocumentChange.Type.ADDED) ) {
-
-                                  try {
-                                      new Thread().sleep(100);
-                                  } catch (InterruptedException e) {
-                                      e.printStackTrace();
-                                  }
-
-                                  FirebaseFirestore.getInstance().collection("users")
-                                          .document(post.getFromID())
-                                          .get()
-                                          .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                              @Override
-                                              public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                  task.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                                      @Override
-                                                      public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                          if (!Collections.disjoint(post.getTag(), tags)) {
-                                                              if ((documentChanges.size() <= 1)) {
-                                                                  if (adapter.getItemCount() == 0) {
-
-                                                                      User userpost = documentSnapshot.toObject(User.class);
-
-                                                                      adapter.add(new ItemPost(post, userpost));
-
-
-
-                                                                  } else return;
-
-                                                              } else {
-
-
-                                                                  User userpost = documentSnapshot.toObject(User.class);
-                                                                  Log.e("teste", String.valueOf(post.getTimestamp()));
-                                                                  adapter.add(adapter.getItemCount(), new ItemPost(post, userpost));
-
-                                                              }
-
-
-                                                          }
-                                                      }
-                                                  });
-                                              }
-
-                                          });
-
-                                  Log.e("teste", "Itens na lista de documentos: " + String.valueOf(documentChanges.size()));
-
-
-                              }
-                              }
-                        }
-
-                    });
-
-            Log.e("teste","Itens no adapter: " + String.valueOf(adapter.getItemCount()));
-        }
-
     }
 
     private void verifyAutentication(){
         if(FirebaseAuth.getInstance().getUid() == null){
-            Intent intent =  new Intent(FeedActivity.this,LoginActivity.class);
+            Intent intent =  new Intent(ProfileActivity.this,LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             Log.e("teste","wtf pq");
             startActivity(intent);
@@ -254,26 +123,92 @@ public class FeedActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
-                           me = documentSnapshot.toObject(User.class);
-                          Picasso.get()
-                                  .load(me.getUrlProfilePhoto())
-                                  .into(photoUser);
-                            adapter.clear();
-                          fethPosts();
-
+                            me = documentSnapshot.toObject(User.class);
+                            fetchProfile();
                         }
                     });
 
         }
     }
+    private void fetchProfile(){
+         FirebaseFirestore.getInstance().collection("users")
+                .document(userID)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-    @Override
+                        userProfile = documentSnapshot.toObject(User.class);
+                        if(userProfile.getUserID().equals(me.getUserID())){
+                            btnDelPerfil.setVisibility(View.VISIBLE);
+                            btnEditPerfil.setVisibility(View.VISIBLE);
+                        }
+
+                        txtUserName.setText(userProfile.getName());
+                        Picasso.get()
+                                .load(userProfile.getUrlProfilePhoto())
+                                .into(photoUserProfile);
+                        fethPosts();
+                    }
+                });
+    }
+
+    private void fethPosts(){
+        if(me != null){
+            adapter.clear();
+            FirebaseFirestore.getInstance().collection("/posts")
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                            List<DocumentChange> documentChanges = value.getDocumentChanges();
+
+                            for (DocumentChange doc: documentChanges){
+
+                                Posts post = doc.getDocument().toObject(Posts.class);
+                                if((doc.getType() == DocumentChange.Type.ADDED) ){
+
+                                    if( post.getFromID().equals(userProfile.getUserID()) ) {
+
+                                        if((documentChanges.size() <= 1 )){
+                                            if(adapter.getItemCount() == 0){
+                                                FirebaseFirestore.getInstance().collection("users")
+                                                        .document(post.getFromID())
+                                                        .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                        User userpost = documentSnapshot.toObject(User.class);
+                                                        adapter.add(new ProfileActivity.ItemPost(post,userpost));
+                                                    }
+                                                });}
+                                            else return;
+
+                                        }else{
+                                            FirebaseFirestore.getInstance().collection("users")
+                                                    .document(post.getFromID())
+                                                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                    User userpost = documentSnapshot.toObject(User.class);
+                                                    adapter.add(new ProfileActivity.ItemPost(post,userpost));
+                                                }
+                                            });}
+
+                                    }
+
+                                }
+                            }
+                        }
+                    });
+
+        }
+
+    }
+
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.feed_menu,menu);
         return true;
     }
-
-    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.logout:
@@ -284,18 +219,13 @@ public class FeedActivity extends AppCompatActivity {
         }
         return true;
     }
-    private void profileActivity(String userID){
-        Intent intent = new Intent(FeedActivity.this,ProfileActivity.class);
-
-        intent.putExtra("userID",userID);
-        startActivity(intent);
-    }
 
 
 
     private class ItemPost extends Item<ViewHolder> {
         Posts post;
         User userPost;
+
 
         public ItemPost(Posts post,User userPost) {
             this.post = post;
@@ -320,7 +250,7 @@ public class FeedActivity extends AppCompatActivity {
             iconComent.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
+                    Intent intent = new Intent(ProfileActivity.this,ComentActivity.class);
                     intent.putExtra("post",post);
                     startActivity(intent);
                 }
@@ -335,7 +265,7 @@ public class FeedActivity extends AppCompatActivity {
                             List<DocumentChange> documentChanges = value.getDocumentChanges();
                             int num = 0;
                             for (DocumentChange doc:
-                                 documentChanges) {
+                                    documentChanges) {
                                 if(doc.getType() == DocumentChange.Type.ADDED)
                                     num++;
                                 else if(doc.getType() == DocumentChange.Type.REMOVED)
@@ -347,11 +277,10 @@ public class FeedActivity extends AppCompatActivity {
                                 num = Integer.valueOf(txtNumComents.getText().toString()) + num;
                                 txtNumComents.setText( String.valueOf(num ) );
                             }
-
                         }
                     });
- 
             spinner.setAdapter(adapterSpinPost);
+
             txtNumLikes.setText(String.valueOf(post.getNumLikes()));
             if(!post.getUserLikedId().contains(me.getUserID()))
                 likeStar.setBackgroundResource(R.drawable.lampiconoff);
@@ -414,7 +343,7 @@ public class FeedActivity extends AppCompatActivity {
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            adapter.removeGroup(adapter.getAdapterPosition(ItemPost.this));
+                                            adapter.removeGroup(adapter.getAdapterPosition(ProfileActivity.ItemPost.this));
                                             Log.e("teste","excluiu porra");
                                             final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+post.getPhotoPostFileName());
                                             ref.delete();
@@ -425,7 +354,7 @@ public class FeedActivity extends AppCompatActivity {
                             break;
                         case 2:
 
-                            Intent intent = new Intent(FeedActivity.this,EditPostActivity.class);
+                            Intent intent = new Intent(ProfileActivity.this,EditPostActivity.class);
                             Log.e("teste","PASSAR PARA O INTENT");
                             intent.putExtra("postID",post.getPostID());
                             Log.e("teste","PASSOU PARA O INTENT");
@@ -445,7 +374,7 @@ public class FeedActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Log.e("teste","clicou");
-                    Intent intent = new Intent(FeedActivity.this,ComentActivity.class);
+                    Intent intent = new Intent(ProfileActivity.this,ComentActivity.class);
                     intent.putExtra("post",post);
                     startActivity(intent);
                 }
@@ -468,7 +397,7 @@ public class FeedActivity extends AppCompatActivity {
             txtNamePost.setText(userPost.getName());
 
             if((post.getUrlPhotoPost() != null) && !post.getUrlPhotoPost().isEmpty()) {
-                //Log.e("teste","TEM FOTO");
+                Log.e("teste","TEM FOTO");
                 photoPost.setVisibility(View.VISIBLE);
                 Picasso.get()
                         .load(post.getUrlPhotoPost())
@@ -478,20 +407,6 @@ public class FeedActivity extends AppCompatActivity {
                 photoPost.setVisibility(View.GONE);
             }
 
-            photoUserPost.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    profileActivity(post.getFromID());
-                }
-            });
-
-            txtNamePost.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    profileActivity(post.getFromID());
-                }
-            });
-
 
         }
 
@@ -500,6 +415,7 @@ public class FeedActivity extends AppCompatActivity {
             return R.layout.item_post;
         }
     }
+
 
 
 

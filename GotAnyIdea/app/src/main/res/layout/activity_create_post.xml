@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     tools:context=".CreatePostActivity">
 
 
@@ -44,6 +45,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginLeft="5dp"
                 android:text="TextView"
+                android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@+id/photo_createpost_user"
@@ -63,6 +65,7 @@
                 tools:srcCompat="@drawable/select_photo2_icon" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
         <EditText
             android:id="@+id/cx_createpost_text"
             android:layout_width="match_parent"
@@ -70,7 +73,9 @@
             android:ems="10"
             android:gravity="top"
             android:hint="@string/ideiapost"
-            android:inputType="textMultiLine|textPersonName" />
+            android:inputType="textMultiLine|textPersonName"
+            android:textColor="@color/white"
+            android:textColorHint="#ABFFFFFF" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -129,9 +134,10 @@
             android:layout_marginTop="5dp"
             android:buttonTint="@color/purple1000"
             android:text="@string/tagtec"
+            android:textColor="@color/white"
             android:textColorHighlight="@color/purple_700"
-            android:textColorLink="@color/purple_700"
 
+            android:textColorLink="@color/purple_700"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -144,9 +150,10 @@
             android:layout_marginRight="50dp"
             android:buttonTint="@color/purple1000"
             android:text="@string/tagculinaria"
+            android:textColor="@color/white"
             android:textColorHighlight="@color/purple_700"
-            android:textColorLink="@color/purple_700"
 
+            android:textColorLink="@color/purple_700"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/check_tag_tecnologia"
             app:layout_constraintTop_toTopOf="parent" />
@@ -158,9 +165,10 @@
             android:layout_marginTop="5dp"
             android:buttonTint="@color/purple1000"
             android:text="@string/tagarte"
+            android:textColor="@color/white"
             android:textColorHighlight="@color/purple_700"
-            android:textColorLink="@color/purple_700"
 
+            android:textColorLink="@color/purple_700"
             app:layout_constraintStart_toStartOf="@+id/check_tag_tecnologia"
             app:layout_constraintTop_toBottomOf="@+id/check_tag_tecnologia" />
 
@@ -171,9 +179,10 @@
             android:layout_marginTop="5dp"
             android:buttonTint="@color/purple1000"
             android:text="@string/taggamb"
+            android:textColor="@color/white"
             android:textColorHighlight="@color/purple_700"
-            android:textColorLink="@color/purple_700"
 
+            android:textColorLink="@color/purple_700"
             app:layout_constraintStart_toStartOf="@+id/check_tag_culinaria"
             app:layout_constraintTop_toBottomOf="@+id/check_tag_culinaria" />
 

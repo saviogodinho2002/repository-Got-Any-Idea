@@ -3,11 +3,9 @@ package com.savio.gotanyidea;
 public class Coment {
 
     private String comentID;
-    private String userComentID;
+    private String fromtID;
     private String comentText;
     private long timestamp;
-    private String userNameComent;
-    private String urlProfilePhotoComent;
 
 
     public Coment() {
@@ -21,12 +19,12 @@ public class Coment {
         this.comentID = comentID;
     }
 
-    public String getUserComentID() {
-        return userComentID;
+    public String getFromtID() {
+        return fromtID;
     }
 
-    public void setUserComentID(String userComentID) {
-        this.userComentID = userComentID;
+    public void setFromtID(String fromtID) {
+        this.fromtID = fromtID;
     }
 
     public String getComentText() {
@@ -45,19 +43,4 @@ public class Coment {
         this.timestamp = timestamp;
     }
 
-    public String getUserNameComent() {
-        return userNameComent;
-    }
-
-    public void setUserNameComent(String userNameComent) {
-        this.userNameComent = userNameComent;
-    }
-
-    public String getUrlProfilePhotoComent() {
-        return urlProfilePhotoComent;
-    }
-
-    public void setUrlProfilePhotoComent(String urlProfilePhotoComent) {
-        this.urlProfilePhotoComent = urlProfilePhotoComent;
-    }
 }

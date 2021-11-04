@@ -41,11 +41,12 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btnRegister;
     private Uri photoSelectedDiretory;
     private String meUserID;
-
+    private DialogLoading cdd;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
         cxName = findViewById(R.id.cx_register_name);
         cxEmail = findViewById(R.id.cx_register_email);
         cxPassword = findViewById(R.id.cx_register_password);
@@ -53,7 +54,7 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btn_register);
         photoSelect = findViewById(R.id.img_photo_select);
 
-
+        btnRegister.setClickable(true);
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,16 +103,22 @@ public class RegisterActivity extends AppCompatActivity {
             Toast.makeText(RegisterActivity.this,"Senhas não correspondem",Toast.LENGTH_SHORT).show();
             return;
         }
+        if(password.length() < 6) {
+            Toast.makeText(RegisterActivity.this,"Senhas devem ter 6 ou mais caracteres",Toast.LENGTH_SHORT).show();
+            return;
+        }
         if((photoSelectedDiretory == null) || (photoSelectedDiretory.toString().isEmpty()) ) {
             Toast.makeText(RegisterActivity.this,"Insira uma foto",Toast.LENGTH_SHORT).show();
             return;
         }
+        btnRegister.setClickable(false);
+        cdd = new DialogLoading(RegisterActivity.this);
+        cdd.show();
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        meUserID = task.getResult().getUser().getUid();
-                        Log.e("teste",task.getResult().getUser().getUid());
+                    public void onSuccess(AuthResult authResult) {
+                        meUserID = authResult.getUser().getUid();
                         saveUserFirebase();
                     }
                 });
@@ -129,38 +136,30 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onSuccess(Uri uri) {
 
                         FirebaseUser userMe = FirebaseAuth.getInstance().getCurrentUser();
-                        userMe.getIdToken(true)
-                                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                        String urlProfilePhoto = uri.toString();
+                        String name = cxName.getText().toString();
+                        User user = new User();
+                        user.setUserID(userMe.getUid());
+                        user.setName(name);
+                        user.setUrlProfilePhoto(urlProfilePhoto);
+                        user.setFileNameProfilePhoto(filename);
+                        FirebaseFirestore.getInstance().collection("/users")
+                                .document(meUserID)
+                                .set(user)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
-                                    public void onComplete(@NonNull  Task<GetTokenResult> task) {
-                                        if(task.isSuccessful()){
-                                            String urlProfilePhoto = uri.toString();
-                                            String name = cxName.getText().toString();
-                                            String token = task.getResult().getToken();
-                                            User user = new User();
-                                            user.setUserID(meUserID);
-                                            user.setToken(token);
-                                            user.setName(name);
-                                            user.setUrlProfilePhoto(urlProfilePhoto);
-
-                                            FirebaseFirestore.getInstance().collection("/users")
-                                                    .document(meUserID)
-                                                    .set(user)
-                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                        @Override
-                                                        public void onSuccess(Void unused) {
-
-                                                            Intent intent =  new Intent(RegisterActivity.this,FeedActivity.class);
-
-                                                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                            startActivity(intent);
-
-                                                        }
-                                                    })
-                                            ;
-                                        }
+                                    public void onSuccess(Void unused) {
+                                        cdd.dismiss();
+                                        Intent intent =  new Intent(RegisterActivity.this,FeedActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
                                     }
-                                });
+                                }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+
+                            }
+                        });
                     }
                 });
 

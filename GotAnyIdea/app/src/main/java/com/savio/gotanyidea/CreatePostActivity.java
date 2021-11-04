@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -70,7 +71,6 @@ public class CreatePostActivity extends AppCompatActivity {
         checkBoxesList.add(chkTecnologia);
         checkBoxesList.add(chkGambiarra);
 
-
         photoSelect = findViewById(R.id.select_photo_post);
         photoUser = findViewById(R.id.photo_createpost_user);
         photoPost = findViewById(R.id.photo_createpost);
@@ -125,9 +125,11 @@ public class CreatePostActivity extends AppCompatActivity {
                 }else tags.remove(chkCulinaria.getText().toString());
             }
         });
+        btnPost.setClickable(true);
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 createPost();
             }
         });
@@ -152,7 +154,7 @@ public class CreatePostActivity extends AppCompatActivity {
             Toast.makeText(CreatePostActivity.this, "Insira um texto", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        btnPost.setClickable(false);
 
         String meUserName = me.getName();
         String meId = me.getUserID();
@@ -161,11 +163,11 @@ public class CreatePostActivity extends AppCompatActivity {
         Posts post = new Posts();
 
         post.setTag(tags);
-        post.setFromName(meUserName);
+
         post.setTimestamp(timestamp);
         post.setFromID(meId);
         post.setPostText(textoPost);
-        post.setUrlPhotoUser(urlPhotoUser);
+
         post.setNumLikes(0);
 
 
@@ -175,8 +177,13 @@ public class CreatePostActivity extends AppCompatActivity {
         String postID = UUID.randomUUID().toString();
         post.setPostID(postID);
 
+        DialogLoading cdd = new DialogLoading(CreatePostActivity.this);
+        cdd.show();
         Log.e("teste","chegou ate aqui?");
         if (selectedPhotoDirectory != null && !selectedPhotoDirectory.toString().isEmpty()) {
+
+
+
             String filename = UUID.randomUUID().toString();
             final StorageReference ref = FirebaseStorage.getInstance().getReference("/images-post/"+filename);
 
@@ -197,6 +204,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void unused) {
+
+                                            cdd.dismiss();
                                             startActivity(intent);
                                         }
                                     });
@@ -217,6 +226,8 @@ public class CreatePostActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
+
+                            cdd.dismiss();
                             startActivity(intent);
                         }
                     });
